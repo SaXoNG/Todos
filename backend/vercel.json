@@ -1,10 +1,9 @@
 {
-  "version": 3,
+  "version": 2,
   "builds": [
     {
       "src": "src/server.ts",
-      "use": "@vercel/node",
-      "config": { "tsConfig": "tsconfig.json" }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
