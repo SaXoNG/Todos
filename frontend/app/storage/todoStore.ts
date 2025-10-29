@@ -57,6 +57,8 @@ export const useTodoStore = create<TodoState>((set, get) => ({
     set({ loading: true });
     try {
       const res = await axios.get(`${BASE_URL}/api/todos/${listID}`);
+      console.log(res);
+
       set({
         todosList: {
           id: listID,

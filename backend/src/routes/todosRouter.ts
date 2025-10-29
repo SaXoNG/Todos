@@ -36,15 +36,27 @@ router.get("/:listId", async (req, res) => {
   const { listId } = req.params;
 
   try {
-    const { data: todos, error } = await supabaseAdmin
+    const { data: todos, error: todosError } = await supabaseAdmin
       .from("todos")
       .select("*")
       .eq("list_id", listId)
       .order("position", { ascending: true });
 
-    if (error) throw error;
+    if (todosError) throw todosError;
 
-    res.json({ listId, todos: todos || [] });
+    const { data: listData, error: listError } = await supabaseAdmin
+      .from("lists")
+      .select("title")
+      .eq("id", listId)
+      .single();
+
+    if (listError) throw listError;
+
+    res.json({
+      listId,
+      title: listData?.title || "Без назви",
+      todos: todos || [],
+    });
   } catch (err: any) {
     console.error("❌ Error fetching todos:", err.message);
     res.status(500).json({ error: "Server error" });

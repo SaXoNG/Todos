@@ -127,7 +127,7 @@ export const CreateTodo = (): JSX.Element => {
               type="submit"
               variant="outlined"
               color="primary"
-              disabled={title.length === 0}
+              disabled={title.length === 0 || !!loading}
               sx={{
                 width: "100%",
                 border: "2px solid black",
