@@ -38,7 +38,7 @@ interface TodoState {
   ) => void;
 }
 
-const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api`;
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const useTodoStore = create<TodoState>((set, get) => ({
   todosList: null,
@@ -56,7 +56,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
   fetchTodoList: async (listID) => {
     set({ loading: true });
     try {
-      const res = await axios.get(`${BASE_URL}/todos/${listID}`);
+      const res = await axios.get(`${BASE_URL}/api/todos/${listID}`);
       set({
         todosList: { id: listID, todos: res.data.todos || [], ...res.data },
       });
@@ -93,7 +93,9 @@ export const useTodoStore = create<TodoState>((set, get) => ({
     set({ loading: true });
 
     try {
-      const res = await axios.post(`${BASE_URL}/lists`, { title: listTitle });
+      const res = await axios.post(`${BASE_URL}/api/lists`, {
+        title: listTitle,
+      });
 
       set({
         todosList: { id: res.data.id, title: res.data.title, todos: [] },
@@ -124,7 +126,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
 
     try {
       const { data } = await axios.post(
-        `${BASE_URL}/todos/${currListData.id}`,
+        `${BASE_URL}/api/todos/${currListData.id}`,
         todo
       );
 
@@ -161,7 +163,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
     });
 
     try {
-      await axios.delete(`${BASE_URL}/todos/${currListData.id}/${todoId}`);
+      await axios.delete(`${BASE_URL}/api/todos/${currListData.id}/${todoId}`);
     } catch (error) {
       console.error("Error deleting todo from server:", error);
       set({
@@ -194,7 +196,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
     });
 
     try {
-      await axios.put(`${BASE_URL}/todos/${listID}/${id}`, updatedTodo);
+      await axios.put(`${BASE_URL}/api/todos/${listID}/${id}`, updatedTodo);
     } catch (error) {
       console.error("Error updating todo on server:", error);
       set({ todosList: curTodoList });
@@ -241,7 +243,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
 
       console.log(updatedTodo);
 
-      await axios.put(`${BASE_URL}/todos/${curTodoList.id}/${todoId}`, {
+      await axios.put(`${BASE_URL}/api/todos/${curTodoList.id}/${todoId}`, {
         title: updatedTodo.title,
         description: updatedTodo.description,
         status: updatedTodo.status,
@@ -252,7 +254,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
         position: t.position,
       }));
       await axios.put(
-        `${BASE_URL}/todos/${curTodoList.id}/reorder`,
+        `${BASE_URL}/api/todos/${curTodoList.id}/reorder`,
         orderPayload
       );
     } catch (error) {
@@ -291,7 +293,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
         position: t.position,
       }));
       await axios.put(
-        `${BASE_URL}/todos/${curTodoList.id}/reorder`,
+        `${BASE_URL}/api/todos/${curTodoList.id}/reorder`,
         orderPayload
       );
     } catch (error) {
