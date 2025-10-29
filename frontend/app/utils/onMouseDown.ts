@@ -9,6 +9,10 @@ export function handleMouseDown(
 ) {
   e.preventDefault();
 
+  if (e.button === 2) {
+    return;
+  }
+
   const target = e.target as HTMLElement;
   if (target.closest("button")) return;
 
