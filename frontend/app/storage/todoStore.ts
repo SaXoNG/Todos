@@ -58,7 +58,12 @@ export const useTodoStore = create<TodoState>((set, get) => ({
     try {
       const res = await axios.get(`${BASE_URL}/api/todos/${listID}`);
       set({
-        todosList: { id: listID, todos: res.data.todos || [], ...res.data },
+        todosList: {
+          id: listID,
+          title: res.data.title,
+          todos: res.data.todos || [],
+          ...res.data,
+        },
       });
       localStorage.setItem("listID", listID);
     } catch (error) {
