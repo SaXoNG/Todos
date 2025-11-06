@@ -1,4 +1,4 @@
-import { TodoStatusType } from "./TodoType";
+import type { TodoStatusType } from "./TodoType";
 
 export type DragginType = null | {
   width: number;

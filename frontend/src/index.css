@@ -1,11 +1,17 @@
 @import "tailwindcss";
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 html,
 body {
   overflow: hidden;
-  box-sizing: border-box;
   height: 100%;
-  margin: 0;
+}
+
+#root {
+  height: 100%;
 }
 
 .background-transtion {

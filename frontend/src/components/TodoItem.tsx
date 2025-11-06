@@ -1,11 +1,11 @@
-import { CSSProperties, JSX, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type JSX } from "react";
 import { useTodoStore } from "../storage/todoStore";
 import { handleMouseDown } from "../utils/onMouseDown";
-import { DragginType } from "../types/DragginType";
-import { TodoStatusType, TodoType } from "../types/TodoType";
 import { IconBtn } from "./IconBtn";
 import { TextField } from "@mui/material";
 import { Loader } from "./Loader";
+import type { TodoStatusType, TodoType } from "../types/TodoType";
+import type { DragginType } from "../types/DragginType";
 
 type Props = {
   todo: TodoType;

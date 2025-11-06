@@ -2,7 +2,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import CloseIcon from "@mui/icons-material/Close";
 import CheckIcon from "@mui/icons-material/Check";
-import { MouseEvent } from "react";
+import type { MouseEvent } from "react";
 
 type Props = {
   type?: "button" | "submit";

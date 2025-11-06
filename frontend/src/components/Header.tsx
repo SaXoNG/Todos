@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import type { JSX } from "react";
 import { Notification } from "../components/Notification";
 
 export const Header = (): JSX.Element => {

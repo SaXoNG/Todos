@@ -1,6 +1,6 @@
 "use client";
 
-import { JSX, useState } from "react";
+import { useState, type JSX } from "react";
 import { useTodoStore } from "../storage/todoStore";
 import { clearNotifinicationTimeout } from "./Notification";
 import { Button, TextField } from "@mui/material";

@@ -1,13 +1,11 @@
-"use client";
-
-import { Header } from "@/components/Header";
-import { Loader } from "@/components/Loader";
-import { TodoTable } from "@/components/TodoTable";
-import { Topbar } from "@/components/Topbar";
-import { useTodoStore } from "@/storage/todoStore";
 import { useEffect } from "react";
+import { useTodoStore } from "./storage/todoStore";
+import { Header } from "./components/Header";
+import { Topbar } from "./components/Topbar";
+import { TodoTable } from "./components/TodoTable";
+import { Loader } from "./components/Loader";
 
-export default function Home() {
+function App() {
   const { loading, todosList, fetchTodoList, setLoading } = useTodoStore();
 
   useEffect(() => {
@@ -21,7 +19,7 @@ export default function Home() {
   }, [fetchTodoList, setLoading]);
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col bg-green-700 overflow-hidden">
       <Header />
       <Topbar />
       <TodoTable todos={todosList?.todos} />
@@ -34,3 +32,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default App;

@@ -1,10 +1,10 @@
 import { create } from "zustand";
 import axios from "axios";
-import { NotificationType } from "../types/NotificationType";
 import { clearNotifinicationTimeout } from "../components/Notification";
+import type { TodoListType } from "../types/TodoListType";
+import type { NotificationType } from "../types/NotificationType";
+import type { TodoStatusType, TodoType } from "../types/TodoType";
 import { reorderTodos } from "../utils/reorderTodos";
-import { TodoListType } from "../types/TodoListType";
-import { TodoStatusType, TodoType } from "../types/TodoType";
 
 type LoadingType =
   | "createTodo"
@@ -38,7 +38,7 @@ interface TodoState {
   ) => void;
 }
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const BASE_URL = import.meta.env.VITE_API_URL;;
 
 export const useTodoStore = create<TodoState>((set, get) => ({
   todosList: null,

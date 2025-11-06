@@ -1,6 +1,6 @@
-import { JSX } from "react";
+import type { JSX } from "react";
+import type { TodoType } from "../types/TodoType";
 import { TodoList } from "./TodoList";
-import { TodoType } from "../types/TodoType";
 
 const todoColumnTitle = ["ToDo", "In Progress", "Done"];
 

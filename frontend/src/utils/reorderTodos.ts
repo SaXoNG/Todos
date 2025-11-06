@@ -1,4 +1,4 @@
-import { TodoType } from "../types/TodoType";
+import type { TodoType } from "../types/TodoType";
 
 export function reorderTodos(
   todoId: string,

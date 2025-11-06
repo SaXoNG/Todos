@@ -1,10 +1,10 @@
 "use client";
 
-import { JSX, useRef, useState } from "react";
 import { Button, TextField } from "@mui/material";
 import { useTodoStore } from "../storage/todoStore";
-import { TodoType } from "../types/TodoType";
 import { Loader } from "./Loader";
+import { useRef, useState, type JSX } from "react";
+import type { TodoType } from "../types/TodoType";
 
 export const CreateTodo = (): JSX.Element => {
   const { loading, addTodo } = useTodoStore();

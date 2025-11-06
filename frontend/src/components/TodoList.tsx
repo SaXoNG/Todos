@@ -1,4 +1,4 @@
-import { TodoStatusType, TodoType } from "../types/TodoType";
+import type { TodoStatusType, TodoType } from "../types/TodoType";
 import { CreateTodo } from "./CreateTodo";
 import { TodoItem } from "./TodoItem";
 

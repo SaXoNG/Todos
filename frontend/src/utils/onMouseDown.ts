@@ -1,5 +1,5 @@
-import { DragginType } from "../types/DragginType";
-import { TodoStatusType } from "../types/TodoType";
+import type { DragginType } from "../types/DragginType";
+import type { TodoStatusType } from "../types/TodoType";
 
 export function handleMouseDown(
   e: React.MouseEvent,

@@ -1,4 +1,4 @@
-import { TodoType } from "./TodoType";
+import type { TodoType } from "./TodoType";
 
 export interface TodoListType {
   id: string | null;
