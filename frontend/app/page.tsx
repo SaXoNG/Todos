@@ -1,11 +1,11 @@
 "use client";
 
-import { Topbar } from "./components/Topbar";
-import { TodoTable } from "./components/TodoTable";
-import { Header } from "./components/Header";
+import { Header } from "@/components/Header";
+import { Loader } from "@/components/Loader";
+import { TodoTable } from "@/components/TodoTable";
+import { Topbar } from "@/components/Topbar";
+import { useTodoStore } from "@/storage/todoStore";
 import { useEffect } from "react";
-import { useTodoStore } from "./storage/todoStore";
-import { Loader } from "./components/Loader";
 
 export default function Home() {
   const { loading, todosList, fetchTodoList, setLoading } = useTodoStore();
