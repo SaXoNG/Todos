@@ -38,7 +38,7 @@ interface TodoState {
   ) => void;
 }
 
-const BASE_URL = import.meta.env.VITE_API_URL;;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const useTodoStore = create<TodoState>((set, get) => ({
   todosList: null,
@@ -85,6 +85,8 @@ export const useTodoStore = create<TodoState>((set, get) => ({
   },
 
   createTodoList: async (listTitle) => {
+    console.log(BASE_URL);
+
     if (!listTitle || listTitle.length < 1) {
       set({
         notification: {
@@ -128,7 +130,6 @@ export const useTodoStore = create<TodoState>((set, get) => ({
 
     if (!currListData || !currListData.id) return;
 
-    console.log("something");
     set({ loading: "createTodo" });
 
     try {

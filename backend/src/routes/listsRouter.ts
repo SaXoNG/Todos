@@ -1,52 +1,52 @@
-import { Router } from "express";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { supabaseAdmin } from "../lib/supabaseClient";
 
-const router = Router();
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method === "POST") {
+    const { title } = req.body as { title?: string };
 
-router.post("/", async (req, res) => {
-  const { title } = req.body;
+    if (!title || title.trim().length === 0) {
+      return res.status(400).json({ error: "Title is required" });
+    }
 
-  if (!title || title.trim().length === 0) {
-    return res.status(400).json({ error: "Title is required" });
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("lists")
+        .insert([{ title }])
+        .select();
+
+      if (error) throw error;
+
+      return res.status(201).json({
+        ...data![0],
+        todos: [],
+      });
+    } catch (err: any) {
+      console.error("❌ Error creating list:", err.message);
+      return res.status(500).json({ error: "Server error" });
+    }
   }
 
-  try {
-    const { data, error } = await supabaseAdmin
-      .from("lists")
-      .insert([{ title }])
-      .select();
+  if (req.method === "GET") {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("lists")
+        .select("*")
+        .order("title", { ascending: true });
 
-    if (error) throw error;
+      if (error) throw error;
 
-    res.status(201).json({
-      ...data[0],
-      todos: [],
-    });
-  } catch (err: any) {
-    console.error("❌ Error creating list:", err.message);
-    res.status(500).json({ error: "Server error" });
+      const listsWithTodos = data!.map((list) => ({
+        ...list,
+        todos: [],
+      }));
+
+      return res.status(200).json(listsWithTodos);
+    } catch (err: any) {
+      console.error("❌ Error fetching lists:", err.message);
+      return res.status(500).json({ error: "Server error" });
+    }
   }
-});
 
-router.get("/", async (_req, res) => {
-  try {
-    const { data, error } = await supabaseAdmin
-      .from("lists")
-      .select("*")
-      .order("title", { ascending: true });
-
-    if (error) throw error;
-
-    const listsWithTodos = data.map((list) => ({
-      ...list,
-      todos: [],
-    }));
-
-    res.json(listsWithTodos);
-  } catch (err: any) {
-    console.error("❌ Error fetching lists:", err.message);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-
-export default router;
+  return res.status(405).json({ error: "Method not allowed" });
+}
