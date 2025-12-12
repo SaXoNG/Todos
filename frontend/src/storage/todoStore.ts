@@ -50,15 +50,11 @@ export const useTodoStore = create<TodoState>((set, get) => ({
       console.error("Error fetching todo list from server:", error);
       set({ todosList: { id: listID, title: "", todos: [] } });
 
-      useNotificationStore.getState().showNotification({
+      useNotificationStore.getState().showAndHideNotification({
         title: "Error!!!",
         text: "List doesn't exist or is empty",
         type: "error",
       });
-      setTimeout(
-        () => useNotificationStore.getState().hideNotification(),
-        clearNotifinicationTimeout
-      );
     } finally {
       useUIStore.getState().setLoading(false);
     }
@@ -126,7 +122,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
     } catch (error) {
       console.error("Error adding todo to server:", error);
 
-      useNotificationStore.getState().showNotification({
+      useNotificationStore.getState().showAndHideNotification({
         title: "Server error",
         text: "Could not add todo",
         type: "error",
@@ -154,7 +150,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
     } catch (error) {
       console.error("Error deleting todo from server:", error);
 
-      useNotificationStore.getState().showNotification({
+      useNotificationStore.getState().showAndHideNotification({
         title: "Server error",
         text: "Could not delete todo",
         type: "error",
@@ -251,7 +247,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
       console.error("Error updating todo status:", error);
       set({ todosList: { ...curTodoList, todos: prevTodos } });
 
-      useNotificationStore.getState().showNotification({
+      useNotificationStore.getState().showAndHideNotification({
         title: "Server error",
         text: "Could not update status",
         type: "error",
@@ -291,7 +287,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
       console.error(error);
       set({ todosList: { ...curTodoList, todos: prevTodos } });
 
-      useNotificationStore.getState().showNotification({
+      useNotificationStore.getState().showAndHideNotification({
         title: "Server error",
         text: "Could not update position",
         type: "error",

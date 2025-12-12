@@ -2,20 +2,16 @@
 
 import { useState, type JSX } from "react";
 import { useTodoStore } from "../storage/todoStore";
-import { clearNotifinicationTimeout } from "./Notification";
 import { Button, TextField } from "@mui/material";
 import { useNotificationStore } from "../storage/notificationStore";
 
 export const Topbar = (): JSX.Element => {
   const todosList = useTodoStore((state) => state.todosList);
   const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
-  const createTodoList = useTodoStore(state => state.createTodoList);
+  const createTodoList = useTodoStore((state) => state.createTodoList);
 
-  const showNotification = useNotificationStore(
-    (state) => state.showNotification
-  );
-  const hideNotification = useNotificationStore(
-    (state) => state.hideNotification
+  const showAndHideNotification = useNotificationStore(
+    (state) => state.showAndHideNotification
   );
 
   const [listID, setListID] = useState("");
@@ -30,15 +26,11 @@ export const Topbar = (): JSX.Element => {
     const isValidUUID = (value: string) => uuidRegex.test(value);
 
     if (!isValidUUID(listID)) {
-      showNotification({
+      showAndHideNotification({
         title: "Invalid listID",
         text: "Example: 9cbe7d38-4eab-46c3-bd95-53624e5b6d51",
         type: "error",
       });
-
-      setTimeout(() => {
-        hideNotification();
-      }, clearNotifinicationTimeout);
 
       return;
     }

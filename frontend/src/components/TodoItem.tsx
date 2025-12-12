@@ -26,8 +26,8 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
   const isDruggin = useUIStore((state) => state.isDruggin);
   const setIsDruggin = useUIStore((state) => state.setIsDruggin);
 
-  const showNotification = useNotificationStore(
-    (state) => state.showNotification
+  const showAndHideNotification = useNotificationStore(
+    (state) => state.showAndHideNotification
   );
 
   const { deleteTodo, updateTodo, updateTodoStatus, updateTodoPosition } =
@@ -52,15 +52,11 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
     };
 
     if (newTitle.length === 0) {
-      showNotification({
+      showAndHideNotification({
         type: "error",
         title: "Error",
         text: "Title is required",
       });
-
-      setTimeout(() => {
-        showNotification(null);
-      }, 3000);
 
       return;
     }
@@ -72,15 +68,11 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
         await updateTodo(updatedTodo);
       } catch {
         setIsUpdating(true);
-        showNotification({
+        showAndHideNotification({
           type: "error",
           title: "Something went wrong!",
           text: "Server error!",
         });
-
-        setTimeout(() => {
-          showNotification(null);
-        }, 3000);
       }
     }
   };
