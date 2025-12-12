@@ -1,11 +1,11 @@
 "use client";
 
-import { useTodoStore } from "../storage/todoStore";
+import { useNotificationStore } from "../storage/notificationStore";
 
 export const clearNotifinicationTimeout = 3000;
 
 export const Notification = () => {
-  const { notification } = useTodoStore();
+  const notification = useNotificationStore((state) => state.notification);
 
   if (!notification) {
     return null;

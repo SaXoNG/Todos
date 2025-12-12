@@ -4,9 +4,14 @@ import { Header } from "./components/Header";
 import { Topbar } from "./components/Topbar";
 import { TodoTable } from "./components/TodoTable";
 import { Loader } from "./components/Loader";
+import { useUIStore } from "./storage/UIStore";
 
 function App() {
-  const { loading, todosList, fetchTodoList, setLoading } = useTodoStore();
+  const loading = useUIStore((state) => state.loading);
+  const setLoading = useUIStore((state) => state.setLoading);
+
+  const todosList = useTodoStore((state) => state.todosList);
+  const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
 
   useEffect(() => {
     const value = localStorage.getItem("listID");

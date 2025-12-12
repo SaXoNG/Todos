@@ -5,9 +5,13 @@ import { useTodoStore } from "../storage/todoStore";
 import { Loader } from "./Loader";
 import { useRef, useState, type JSX } from "react";
 import type { TodoType } from "../types/TodoType";
+import { useUIStore } from "../storage/UIStore";
 
 export const CreateTodo = (): JSX.Element => {
-  const { loading, addTodo } = useTodoStore();
+  const loading = useUIStore((state) => state.loading);
+
+  const addTodo = useTodoStore(state => state.addTodo);
+  
   const [creatingTodo, setCreatingTodo] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

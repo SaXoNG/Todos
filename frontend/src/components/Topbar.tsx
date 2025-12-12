@@ -4,15 +4,20 @@ import { useState, type JSX } from "react";
 import { useTodoStore } from "../storage/todoStore";
 import { clearNotifinicationTimeout } from "./Notification";
 import { Button, TextField } from "@mui/material";
+import { useNotificationStore } from "../storage/notificationStore";
 
 export const Topbar = (): JSX.Element => {
-  const {
-    todosList,
-    fetchTodoList,
-    createTodoList,
-    showNotification,
-    hideNotification,
-  } = useTodoStore();
+  const todosList = useTodoStore((state) => state.todosList);
+  const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
+  const createTodoList = useTodoStore(state => state.createTodoList);
+
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification
+  );
+  const hideNotification = useNotificationStore(
+    (state) => state.hideNotification
+  );
+
   const [listID, setListID] = useState("");
   const [createdListTitle, setCreatedListTitle] = useState("");
 

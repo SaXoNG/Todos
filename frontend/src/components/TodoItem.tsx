@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties, type JSX } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type JSX,
+} from "react";
 import { useTodoStore } from "../storage/todoStore";
 import { handleMouseDown } from "../utils/onMouseDown";
 import { IconBtn } from "./IconBtn";
@@ -6,6 +12,8 @@ import { TextField } from "@mui/material";
 import { Loader } from "./Loader";
 import type { TodoStatusType, TodoType } from "../types/TodoType";
 import type { DragginType } from "../types/DragginType";
+import { useUIStore } from "../storage/UIStore";
+import { useNotificationStore } from "../storage/notificationStore";
 
 type Props = {
   todo: TodoType;
@@ -14,16 +22,16 @@ type Props = {
 export const TodoItem = ({ todo }: Props): JSX.Element => {
   const { id, title, description } = todo;
 
-  const {
-    loading,
-    isDruggin,
-    setIsDruggin,
-    deleteTodo,
-    showNotification,
-    updateTodo,
-    updateTodoStatus,
-    updateTodoPosition,
-  } = useTodoStore();
+  const loading = useUIStore((state) => state.loading);
+  const isDruggin = useUIStore((state) => state.isDruggin);
+  const setIsDruggin = useUIStore((state) => state.setIsDruggin);
+
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification
+  );
+
+  const { deleteTodo, updateTodo, updateTodoStatus, updateTodoPosition } =
+    useTodoStore();
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
