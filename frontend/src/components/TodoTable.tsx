@@ -1,16 +1,46 @@
-import type { JSX } from "react";
-import type { TodoType } from "../types/TodoType";
+import { useEffect, type JSX } from "react";
+
 import { TodoList } from "./TodoList";
+import { useTodoStore } from "../storage/todoStore";
+import { useUIStore } from "../storage/UIStore";
+import { Loader } from "./Loader";
 
-const todoColumnTitle = ["ToDo", "In Progress", "Done"];
+const todoColumnTitles = ["ToDo", "In Progress", "Done"];
 
-type Props = {
-  todos: TodoType[] | null | undefined;
-};
+export const TodoTable = (): JSX.Element => {
+  const setLoading = useUIStore((state) => state.setLoading);
+  const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
 
-export const TodoTable = ({ todos }: Props): JSX.Element | null => {
-  if (todos === undefined || todos === null) {
-    return null;
+  const loading = useUIStore((state) => state.loading);
+  const todosList = useTodoStore((state) => state.listInfo);
+  const todos = useTodoStore((state) => state.todos);
+
+  useEffect(() => {
+    const listId = localStorage.getItem("listID");
+
+    if (!listId) {
+      setLoading(false);
+
+      return;
+    }
+
+    fetchTodoList(listId);
+  }, [fetchTodoList, setLoading]);
+
+  if (loading === true) {
+    return (
+      <div className="relative h-full">
+        <Loader />
+      </div>
+    );
+  }
+
+  if (!todosList) {
+    return (
+      <div className="flex-1 flex justify-center items-center font-bold text-6xl">
+        List is not selected!
+      </div>
+    );
   }
 
   const todoTodos = todos.filter((todo) => todo.status === "todo");
@@ -22,11 +52,11 @@ export const TodoTable = ({ todos }: Props): JSX.Element | null => {
       className="grid p-6 gap-x-6 h-full overflow-hidden"
       data-container
       style={{
-        gridTemplateColumns: `repeat(${todoColumnTitle.length}, 1fr)`,
+        gridTemplateColumns: `repeat(${todoColumnTitles.length}, 1fr)`,
         gridTemplateRows: "auto 1fr",
       }}
     >
-      {todoColumnTitle.map((title, i) => {
+      {todoColumnTitles.map((title, i) => {
         return (
           <div key={i} className="h-8 mb-4 text-center text-2xl font-bold">
             {title}

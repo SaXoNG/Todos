@@ -1,7 +1,4 @@
-import type { TodoType } from "./TodoType";
-
-export interface TodoListType {
+export interface ListInfoType {
   id: string | null;
   title: string;
-  todos: TodoType[] | null;
 }

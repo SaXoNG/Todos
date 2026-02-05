@@ -22,21 +22,24 @@ type Props = {
 export const TodoItem = ({ todo }: Props): JSX.Element => {
   const { id, title, description } = todo;
 
-  const loading = useUIStore((state) => state.loading);
-  const isDruggin = useUIStore((state) => state.isDruggin);
   const setIsDruggin = useUIStore((state) => state.setIsDruggin);
 
-  const showAndHideNotification = useNotificationStore(
-    (state) => state.showAndHideNotification
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification,
   );
 
-  const { deleteTodo, updateTodo, updateTodoStatus, updateTodoPosition } =
-    useTodoStore();
+  const deleteTodo = useTodoStore((state) => state.deleteTodo);
+  const updateTodo = useTodoStore((state) => state.updateTodo);
+  const updateTodoStatus = useTodoStore((state) => state.updateTodoStatus);
+  const updateTodoPosition = useTodoStore((state) => state.updateTodoPosition);
+
+  const loading = useUIStore((state) => state.loading);
+  const isDruggin = useUIStore((state) => state.isDruggin);
 
   const [isUpdating, setIsUpdating] = useState(false);
   const [newTitle, setNewTitle] = useState(title);
   const [newDescription, setNewDescription] = useState(description);
-  const [dragging, setDragging] = useState<DragginType>(null);
+  const [dragging, setDragging] = useState<DragginType | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const todoRef = useRef<HTMLDivElement>(null);
@@ -52,7 +55,7 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
     };
 
     if (newTitle.length === 0) {
-      showAndHideNotification({
+      showNotification({
         type: "error",
         title: "Error",
         text: "Title is required",
@@ -68,7 +71,7 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
         await updateTodo(updatedTodo);
       } catch {
         setIsUpdating(true);
-        showAndHideNotification({
+        showNotification({
           type: "error",
           title: "Something went wrong!",
           text: "Server error!",
@@ -115,7 +118,7 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
       if (!draggingRef.current) return;
 
       const column = document.querySelector<HTMLDivElement>(
-        `[data-column="${draggingRef.current.status}"]`
+        `[data-column="${draggingRef.current.status}"]`,
       );
       if (!column) return;
 
@@ -147,7 +150,7 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
 
       const columnEl = (e.target as HTMLElement).closest("[data-column]");
       const columnStatus = columnEl?.getAttribute(
-        "data-column"
+        "data-column",
       ) as TodoStatusType | null;
       const newStatus =
         columnStatus || draggingRef.current.status || todo.status;

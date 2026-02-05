@@ -4,29 +4,25 @@ import { useState, type JSX } from "react";
 import { useTodoStore } from "../storage/todoStore";
 import { Button, TextField } from "@mui/material";
 import { useNotificationStore } from "../storage/notificationStore";
+import isValidUUID from "../utils/validationListID";
 
 export const Topbar = (): JSX.Element => {
-  const todosList = useTodoStore((state) => state.todosList);
+  const todosList = useTodoStore((state) => state.listInfo);
   const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
   const createTodoList = useTodoStore((state) => state.createTodoList);
 
-  const showAndHideNotification = useNotificationStore(
-    (state) => state.showAndHideNotification
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification,
   );
 
   const [listID, setListID] = useState("");
-  const [createdListTitle, setCreatedListTitle] = useState("");
+  const [listTitle, setListTitle] = useState("");
 
-  const handleFetchList = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleFetchList = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const uuidRegex =
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
-
-    const isValidUUID = (value: string) => uuidRegex.test(value);
-
     if (!isValidUUID(listID)) {
-      showAndHideNotification({
+      showNotification({
         title: "Invalid listID",
         text: "Example: 9cbe7d38-4eab-46c3-bd95-53624e5b6d51",
         type: "error",
@@ -35,14 +31,18 @@ export const Topbar = (): JSX.Element => {
       return;
     }
 
-    fetchTodoList(listID);
-    setListID("");
+    try {
+      await fetchTodoList(listID);
+      setListID("");
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleCreate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    createTodoList(createdListTitle);
-    setCreatedListTitle("");
+    createTodoList(listTitle);
+    setListTitle("");
   };
 
   return (
@@ -106,7 +106,7 @@ export const Topbar = (): JSX.Element => {
           type="submit"
           variant="outlined"
           color="primary"
-          disabled={createdListTitle.length === 0}
+          disabled={listTitle.length === 0}
           sx={{
             width: "auto",
             border: "2px solid black",
@@ -120,8 +120,8 @@ export const Topbar = (): JSX.Element => {
         <TextField
           label="Title"
           variant="outlined"
-          value={createdListTitle}
-          onChange={(e) => setCreatedListTitle(e.target.value)}
+          value={listTitle}
+          onChange={(e) => setListTitle(e.target.value)}
           size="small"
           sx={{
             "& .MuiOutlinedInput-root": {

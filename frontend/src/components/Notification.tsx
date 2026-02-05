@@ -1,11 +1,23 @@
 "use client";
 
+import { useEffect } from "react";
 import { useNotificationStore } from "../storage/notificationStore";
 
 export const clearNotifinicationTimeout = 3000;
 
 export const Notification = () => {
   const notification = useNotificationStore((state) => state.notification);
+  const hideNotification = useNotificationStore(
+    (state) => state.hideNotification,
+  );
+
+  useEffect(() => {
+    if (notification?.type === "error") {
+      setTimeout(() => {
+        hideNotification();
+      }, clearNotifinicationTimeout);
+    }
+  }, [notification, hideNotification]);
 
   if (!notification) {
     return null;

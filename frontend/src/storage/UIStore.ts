@@ -13,7 +13,6 @@ interface UIStoreType {
 }
 
 export const useUIStore = create<UIStoreType>((set) => ({
-  todosList: null,
   loading: true,
   isDruggin: false,
   setLoading: (value) => set({ loading: value }),
