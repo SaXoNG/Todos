@@ -27,7 +27,7 @@ interface TodoState {
   ) => void;
 };
 
-const BASE_URL = import.meta.env.VITE_BASE_URL;
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 export const useTodoStore = create<TodoState>((set, get) => ({
   listInfo: null,
