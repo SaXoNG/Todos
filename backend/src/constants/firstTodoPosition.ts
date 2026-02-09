@@ -1,0 +1,3 @@
+const FIRST_TODO_POSITION = 1000000;
+
+export default FIRST_TODO_POSITION;

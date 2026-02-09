@@ -1,0 +1,3 @@
+const TODO_TITLE_MAX_LENGTH = 50;
+
+export default TODO_TITLE_MAX_LENGTH;

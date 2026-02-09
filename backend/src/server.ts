@@ -1,22 +1,18 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import listsRouter from "./routes/listsRouter";
-import todosRouter from "./routes/todosRouter";
+import app from "./app";
+import connectDB from "./config/db";
+import { env } from "./config/env";
 
-dotenv.config();
+const startServer = async (): Promise<void> => {
+  try {
+    await connectDB(env.MONGO_URI);
 
-const app = express();
+    app.listen(env.PORT, () => {
+      console.log(`Server is running on port ${env.PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error);
+    process.exit(1);
+  }
+};
 
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.json({ message: "✅ Сервер працює" });
-});
-
-app.use("/api/lists", listsRouter);
-app.use("/api/todos", todosRouter);
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Сервер запущено на порту ${PORT}`));
+startServer();

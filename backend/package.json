@@ -1,28 +1,25 @@
 {
   "name": "todo-backend",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "start": "ts-node src/server.ts"
+    "build": "tsc",
+    "start": "node dist/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
-    "@supabase/supabase-js": "^2.77.0",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "pg": "^8.16.3"
+    "http-status-codes": "^2.3.0",
+    "mongoose": "^9.1.6",
+    "pg": "^8.16.3",
+    "dotenv": "^17.2.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/node": "^24.9.2",
     "@types/pg": "^8.15.6",
-    "@vercel/node": "^5.5.15",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",

@@ -1,0 +1,3 @@
+const LIST_TITLE_MAX_LENGTH = 30;
+
+export default LIST_TITLE_MAX_LENGTH;
