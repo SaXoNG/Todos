@@ -1,5 +1,3 @@
-const uuidRegex =
-  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
-const isValidUUID = (value: string) => uuidRegex.test(value);
+const isValidObjectId = (id: string) => /^[0-9a-fA-F]{24}$/.test(id);
 
-export default isValidUUID;
+export default isValidObjectId;

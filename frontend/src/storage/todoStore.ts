@@ -1,54 +1,47 @@
 import { create } from "zustand";
-import axios from "axios";
+
 import type { ListInfoType } from "../types/TodoListType";
-import type { TodoStatusType, TodoType } from "../types/TodoType";
-import { reorderTodos } from "../utils/reorderTodos";
 import { useNotificationStore } from "./notificationStore";
 import { useUIStore } from "./UIStore";
+import type { CreateTodoPayload } from "../types/CreateTodoPayload";
+import type { TodoType, TODO_STATUS } from "../types/TodoType";
+import type { MoveTodoPayload } from "../types/moveTodoPayload";
+import { api } from "../api/axios";
 
-interface TodoState {
+interface TodosState {
   listInfo: ListInfoType | null;
   todos: TodoType[];
   fetchTodoList: (listID: string) => void;
   createTodoList: (value: string) => void;
-  addTodo: (todo: TodoType) => void;
+  createTodo: (todo: CreateTodoPayload) => void;
   deleteTodo: (value: string) => void;
-  updateTodo: (value: TodoType) => void;
-  updateTodoStatus: (
+  updateTodoText: (value: TodoType) => void;
+  moveTodo: (
     todoId: string,
-    selectedPosition: number,
-    targetPosition: number | null,
-    newStatus?: TodoStatusType,
+    targetId: string | null,
+    newStatus?: TODO_STATUS,
   ) => void;
-  updateTodoPosition: (
-    todoId: string,
-    selectedPosition: number,
-    targetPosition: number | null,
-  ) => void;
-};
+}
 
-const BASE_URL = import.meta.env.VITE_API_URL;
-
-export const useTodoStore = create<TodoState>((set, get) => ({
+export const useTodoStore = create<TodosState>((set, get) => ({
   listInfo: null,
   todos: [],
   fetchTodoList: async (listID) => {
-    useUIStore.getState().setLoading(true);
+    useUIStore.getState().setGlobalLoading(true);
 
     try {
-      const res = await axios.get(`${BASE_URL}/api/todos/${listID}`);
-
-      const { listId, title, todos } = res.data;
+      const res = await api.get(`/lists/${listID}`);
+      const { id, title, todos } = res.data;
 
       set({
         listInfo: {
-          id: listId,
+          id,
           title: title,
         },
         todos: todos,
       });
 
-      localStorage.setItem("listID", listId);
+      localStorage.setItem("listId", id);
     } catch (err) {
       console.error("Error fetching todo list from server:", err);
 
@@ -58,30 +51,21 @@ export const useTodoStore = create<TodoState>((set, get) => ({
         type: "error",
       });
     } finally {
-      useUIStore.getState().setLoading(false);
+      useUIStore.getState().setGlobalLoading(false);
     }
   },
 
   createTodoList: async (listTitle) => {
-    if (listTitle.length < 3) {
-      useNotificationStore.getState().showNotification({
-        title: "Error!",
-        text: "Title must be at least 3 character",
-        type: "error",
-      });
-
-      return;
-    }
-
     try {
-      useUIStore.getState().setLoading(true);
+      useUIStore.getState().setGlobalLoading(true);
 
-      const res = await axios.post(`${BASE_URL}/api/lists`, {
+      const res = await api.post(`/lists`, {
         title: listTitle,
       });
+
       const { id, title } = res.data;
 
-      set({ listInfo: { id, title } });
+      set({ listInfo: { id, title }, todos: [] });
 
       useNotificationStore.getState().showNotification({
         title: "New list created. Save this ID!!!",
@@ -89,7 +73,7 @@ export const useTodoStore = create<TodoState>((set, get) => ({
         type: "success",
       });
 
-      localStorage.setItem("listID", id);
+      localStorage.setItem("listId", id);
     } catch (error) {
       console.error("Error creating new todo list:", error);
 
@@ -99,24 +83,17 @@ export const useTodoStore = create<TodoState>((set, get) => ({
         type: "error",
       });
     } finally {
-      useUIStore.getState().setLoading(false);
+      useUIStore.getState().setGlobalLoading(false);
     }
   },
 
-  addTodo: async (todo) => {
+  createTodo: async (todo) => {
     const currListData = get().listInfo;
     const currTodos = get().todos;
 
-    if (!currListData) {
-      return;
-    }
-
     try {
-      useUIStore.getState().setLoading("createTodo");
-      const { data } = await axios.post(
-        `${BASE_URL}/api/todos/${currListData.id}`,
-        todo,
-      );
+      useUIStore.getState().setCreatingTodo(true);
+      const { data } = await api.post(`/todos/${currListData?.id}`, todo);
 
       set({
         todos: [data, ...currTodos],
@@ -130,22 +107,17 @@ export const useTodoStore = create<TodoState>((set, get) => ({
         type: "error",
       });
     } finally {
-      useUIStore.getState().setLoading(false);
+      useUIStore.getState().setCreatingTodo(false);
     }
   },
 
   deleteTodo: async (todoId) => {
-    const currListData = get().listInfo;
     const currTodos = get().todos;
 
-    if (!currListData) {
-      return;
-    }
-
     try {
-      useUIStore.getState().setLoading(todoId);
+      useUIStore.getState().setLoadingTodoId(todoId);
 
-      await axios.delete(`${BASE_URL}/api/todos/${currListData.id}/${todoId}`);
+      await api.delete(`/todos/${todoId}`);
 
       set({
         todos: currTodos.filter((t) => t.id !== todoId),
@@ -161,147 +133,125 @@ export const useTodoStore = create<TodoState>((set, get) => ({
 
       set({ todos: currTodos });
     } finally {
-      useUIStore.getState().setLoading(false);
+      useUIStore.getState().setLoadingTodoId(null);
     }
   },
 
-  updateTodo: async (updatedTodo) => {
-    const { id } = updatedTodo;
-    const curTodoList = get().listInfo;
-    const listID = curTodoList?.id;
+  updateTodoText: async (updatedTodo) => {
+    const { id, title, description } = updatedTodo;
     const currTodos = get().todos;
-
-    if (!currTodos || !listID) {
-      return;
-    }
-
-    useUIStore.getState().setLoading(id);
 
     set({ todos: currTodos.map((t) => (t.id === id ? updatedTodo : t)) });
 
     try {
-      await axios.put(`${BASE_URL}/api/todos/${listID}/${id}`, updatedTodo);
+      useUIStore.getState().setLoadingTodoId(id);
+
+      await api.patch(`/todos/${id}`, { title, description });
     } catch (error) {
       console.error("Error updating todo on server:", error);
       set({ todos: currTodos });
     } finally {
-      useUIStore.getState().setLoading(false);
+      useUIStore.getState().setLoadingTodoId(null);
     }
   },
 
-  updateTodoStatus: async (
+  moveTodo: async (
     todoId: string,
-    selectedPosition: number,
-    targetPosition: number | null,
-    newStatus?: TodoStatusType,
+    targetId: string | null,
+    newStatus?: TODO_STATUS,
   ) => {
-    const curTodoList = get().listInfo;
-    const curListId = curTodoList?.id;
     const currTodos = get().todos;
-
-    if (!currTodos || !curListId) {
+    if (!currTodos) {
       return;
     }
 
     const prevTodos = currTodos.map((t) => ({ ...t }));
 
-    const todos = reorderTodos(
-      todoId,
-      currTodos,
-      selectedPosition,
-      targetPosition,
+    const todoToUpdate = currTodos.find((t) => t.id === todoId);
+    if (!todoToUpdate) {
+      return;
+    }
+
+    const targetStatus = newStatus ?? todoToUpdate.status;
+
+    const filteredTodos = currTodos
+      .filter((t) => t.id !== todoId && t.status === targetStatus)
+      .sort((a, b) => a.position - b.position);
+
+    const preparedPayload: MoveTodoPayload = { todoId };
+
+    let beforeTodo: TodoType | null = null;
+    let afterTodo: TodoType | null = null;
+
+    if (targetId) {
+      afterTodo = filteredTodos.find((t) => t.id === targetId) ?? null;
+
+      if (afterTodo) {
+        const index = filteredTodos.findIndex((t) => t.id === targetId);
+        beforeTodo = index > 0 ? filteredTodos[index - 1] : null;
+
+        preparedPayload.afterId = afterTodo.id;
+        if (beforeTodo) {
+          preparedPayload.beforeId = beforeTodo.id;
+        }
+      }
+    } else if (filteredTodos.length > 0) {
+      beforeTodo = filteredTodos[filteredTodos.length - 1];
+      preparedPayload.beforeId = beforeTodo.id;
+    }
+
+    let newPosition: number;
+
+    if (beforeTodo && afterTodo) {
+      newPosition = (beforeTodo.position + afterTodo.position) / 2;
+    } else if (!beforeTodo && afterTodo) {
+      newPosition = afterTodo.position - 1000;
+    } else if (beforeTodo && !afterTodo) {
+      newPosition = beforeTodo.position + 1000;
+    } else {
+      newPosition = 0;
+    }
+
+    if (newStatus !== undefined && newStatus !== todoToUpdate.status) {
+      preparedPayload.status = newStatus;
+    }
+
+    const optimisticTodos = currTodos.map((t) =>
+      t.id === todoId
+        ? {
+            ...t,
+            position: newPosition,
+            status: newStatus ? newStatus : t.status,
+          }
+        : t,
     );
 
-    if (newStatus) {
-      if (!["todo", "in_process", "completed"].includes(newStatus)) {
-        console.error("Invalid status:", newStatus);
-        return;
-      }
-      todos.forEach((t) => {
-        if (t.id === todoId) t.status = newStatus;
-      });
-    }
-
-    const newTodos = todos.sort((a, b) => a.position - b.position);
-
-    useUIStore.getState().setLoading(todoId);
-
-    set({ todos: newTodos });
+    set({ todos: optimisticTodos });
 
     try {
-      const updatedTodo = newTodos.find((t) => t.id === todoId);
-      if (!updatedTodo) throw new Error("Todo not found");
+      useUIStore.getState().setLoadingTodoId(todoId);
 
-      await axios.put(`${BASE_URL}/api/todos/${curTodoList.id}/${todoId}`, {
-        title: updatedTodo.title,
-        description: updatedTodo.description,
-        status: updatedTodo.status,
-      });
-
-      const orderPayload = newTodos.map((t) => ({
-        id: t.id,
-        position: t.position,
-      }));
-      await axios.put(
-        `${BASE_URL}/api/todos/${curTodoList.id}/reorder`,
-        orderPayload,
+      const { data: updatedTodo } = await api.patch(
+        `/todos/${todoId}/move`,
+        preparedPayload,
       );
+
+      set({
+        todos: get().todos?.map((t) =>
+          t.id === updatedTodo.id ? updatedTodo : t,
+        ),
+      });
     } catch (error) {
-      console.error("Error updating todo status:", error);
+      console.error("Error updating todo:", error);
       set({ todos: prevTodos });
 
       useNotificationStore.getState().showNotification({
         title: "Server error",
-        text: "Could not update status",
+        text: "Could not update todo",
         type: "error",
       });
     } finally {
-      useUIStore.getState().setLoading(false);
-    }
-  },
-
-  updateTodoPosition: async (todoId, selectedPosition, targetPosition) => {
-    const curTodoList = get().listInfo;
-    const curListId = curTodoList?.id;
-    const currTodos = get().todos;
-
-    if (!currTodos || !curListId) {
-      return;
-    }
-
-    const prevTodos = currTodos.map((t) => ({ ...t }));
-    const newTodos = reorderTodos(
-      todoId,
-      currTodos,
-      selectedPosition,
-      targetPosition,
-    ).sort((a, b) => a.position - b.position);
-
-    useUIStore.getState().setLoading(todoId);
-
-    set({ todos: newTodos });
-
-    try {
-      const orderPayload = newTodos.map((t) => ({
-        id: t.id,
-        position: t.position,
-      }));
-
-      await axios.put(
-        `${BASE_URL}/api/todos/${curTodoList.id}/reorder`,
-        orderPayload,
-      );
-    } catch (error) {
-      console.error(error);
-      set({ todos: prevTodos });
-
-      useNotificationStore.getState().showNotification({
-        title: "Server error",
-        text: "Could not update position",
-        type: "error",
-      });
-    } finally {
-      useUIStore.getState().setLoading(false);
+      useUIStore.getState().setLoadingTodoId(null);
     }
   },
 }));

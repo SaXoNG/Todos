@@ -1,20 +1,27 @@
 import { create } from "zustand";
 
-type LoadingType =
-  | "createTodo"
-  | string // todoID
-  | boolean;
-
 interface UIStoreType {
-  isDruggin: boolean;
-  loading: LoadingType;
-  setLoading: (value: LoadingType) => void;
-  setIsDruggin: (value: boolean) => void;
+  isDragging: boolean;
+
+  globalLoading: boolean;
+  creatingTodo: boolean;
+  loadingTodoId: string | null;
+
+  setGlobalLoading: (value: boolean) => void;
+  setCreatingTodo: (value: boolean) => void;
+  setLoadingTodoId: (id: string | null) => void;
+  setIsDragging: (value: boolean) => void;
 }
 
 export const useUIStore = create<UIStoreType>((set) => ({
-  loading: true,
-  isDruggin: false,
-  setLoading: (value) => set({ loading: value }),
-  setIsDruggin: (value) => set({ isDruggin: value }),
+  isDragging: false,
+
+  globalLoading: false,
+  creatingTodo: false,
+  loadingTodoId: null,
+
+  setGlobalLoading: (value) => set({ globalLoading: value }),
+  setCreatingTodo: (value) => set({ creatingTodo: value }),
+  setLoadingTodoId: (id) => set({ loadingTodoId: id }),
+  setIsDragging: (value) => set({ isDragging: value }),
 }));
