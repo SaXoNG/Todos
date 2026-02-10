@@ -17,6 +17,7 @@ export const IconBtn = ({ type = "button", icon, onClick }: Props) => {
       type={type}
       onClick={onClick}
       className="inline-flex items-center justify-center p-0 hover:bg-black/10 rounded-full h-7 w-7 cursor-pointer"
+      onPointerDown={(e) => e.stopPropagation()}
     >
       {icon === "delete" && <DeleteIcon sx={{ fontSize: 20 }} />}
       {icon === "edit" && <EditIcon sx={{ fontSize: 20 }} />}

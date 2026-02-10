@@ -1,34 +1,67 @@
-import { useEffect } from "react";
+import { DndContext, rectIntersection, DragOverlay } from "@dnd-kit/core";
+import type { DragStartEvent, DragMoveEvent } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { useEffect, useState } from "react";
 
 import { TodoList } from "./todoList/TodoList";
 import { useTodoStore } from "../storage/todoStore";
 import { useUIStore } from "../storage/UIStore";
 import { Loader } from "./Loader";
-import { TODO_STATUS } from "../types/TodoType";
+import { TODO_STATUS, type TodoType } from "../types/TodoType";
+import { TodoItem } from "./todo/TodoItem";
 
-const todoColumnTitles = ["ToDo", "In Progress", "Done"];
+const TableColumns = [
+  { status: TODO_STATUS.TODO, title: "ToDo" },
+  { status: TODO_STATUS.IN_PROCESS, title: "In Progress" },
+  { status: TODO_STATUS.COMPLETED, title: "Done" },
+];
 
 export const TodoTable = () => {
   const setGlobalLoading = useUIStore((state) => state.setGlobalLoading);
   const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
+  const moveTodo = useTodoStore((state) => state.moveTodo);
 
   const globalLoading = useUIStore((state) => state.globalLoading);
   const todosList = useTodoStore((state) => state.listInfo);
   const todos = useTodoStore((state) => state.todos);
 
+  const [activeTodo, setActiveTodo] = useState<TodoType | null>(null);
+  const [dragTodosByStatus, setDragTodosByStatus] = useState<
+    Record<TODO_STATUS, TodoType[]>
+  >({
+    [TODO_STATUS.TODO]: [],
+    [TODO_STATUS.IN_PROCESS]: [],
+    [TODO_STATUS.COMPLETED]: [],
+  });
+
   useEffect(() => {
     const listId = localStorage.getItem("listId");
-
     if (!listId) {
       setGlobalLoading(false);
-
       return;
     }
-
     fetchTodoList(listId);
   }, [fetchTodoList, setGlobalLoading]);
 
-  if (globalLoading === true) {
+  useEffect(() => {
+    const sortedTodos = [...todos].sort((a, b) => a.position - b.position);
+    setDragTodosByStatus({
+      [TODO_STATUS.TODO]: sortedTodos.filter(
+        (t) => t.status === TODO_STATUS.TODO,
+      ),
+      [TODO_STATUS.IN_PROCESS]: sortedTodos.filter(
+        (t) => t.status === TODO_STATUS.IN_PROCESS,
+      ),
+      [TODO_STATUS.COMPLETED]: sortedTodos.filter(
+        (t) => t.status === TODO_STATUS.COMPLETED,
+      ),
+    });
+  }, [todos]);
+
+  if (globalLoading) {
     return (
       <div className="relative h-full">
         <Loader />
@@ -44,51 +77,127 @@ export const TodoTable = () => {
     );
   }
 
-  const sortedTodos = [...todos].sort(
-    (todo1, todo2) => todo1.position - todo2.position,
-  );
-  const todoTodos = sortedTodos.filter(
-    (todo) => todo.status === TODO_STATUS.TODO,
-  );
-  const inProgressTodos = sortedTodos.filter(
-    (todo) => todo.status === TODO_STATUS.IN_PROCESS,
-  );
-  const completedTodos = sortedTodos.filter(
-    (todo) => todo.status === TODO_STATUS.COMPLETED,
-  );
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    const todo = todos.find((t) => t.id === String(active.id)) || null;
+    setActiveTodo(todo);
+  };
+
+  const handleDragMove = (event: DragMoveEvent) => {
+    const { over } = event;
+    if (!over || !activeTodo) return;
+
+    setDragTodosByStatus((prev) => {
+      const currentColumn = activeTodo.status;
+      const oldIndex = prev[currentColumn].findIndex(
+        (t) => t.id === activeTodo.id,
+      );
+
+      if (!currentColumn) return prev;
+
+      let targetColumn: TODO_STATUS | null = null;
+      let newIndex = 0;
+
+      if (String(over.id).startsWith("column-target-")) {
+        targetColumn = String(over.id).replace(
+          "column-target-",
+          "",
+        ) as TODO_STATUS;
+        newIndex = prev[targetColumn].length;
+      } else if (over.data.current?.sortable?.containerId) {
+        targetColumn = over.data.current.sortable.containerId as TODO_STATUS;
+        const todoIndex = prev[targetColumn].findIndex((t) => t.id === over.id);
+
+        newIndex = todoIndex >= 0 ? todoIndex : prev[targetColumn].length;
+      }
+
+      if (!targetColumn) return prev;
+
+      const newState: Record<TODO_STATUS, TodoType[]> = {
+        [TODO_STATUS.TODO]: prev[TODO_STATUS.TODO].filter(
+          (t) => t.id !== activeTodo.id,
+        ),
+        [TODO_STATUS.IN_PROCESS]: prev[TODO_STATUS.IN_PROCESS].filter(
+          (t) => t.id !== activeTodo.id,
+        ),
+        [TODO_STATUS.COMPLETED]: prev[TODO_STATUS.COMPLETED].filter(
+          (t) => t.id !== activeTodo.id,
+        ),
+      };
+
+      if (currentColumn === targetColumn && oldIndex === newIndex) return prev;
+
+      newState[targetColumn].splice(newIndex, 0, activeTodo);
+
+      return newState;
+    });
+  };
+
+  const handleDragEnd = () => {
+    if (!activeTodo) return;
+
+    const targetColumn = (Object.keys(dragTodosByStatus) as TODO_STATUS[]).find(
+      (col) => dragTodosByStatus[col].some((t) => t.id === activeTodo.id),
+    );
+    if (!targetColumn) {
+      setActiveTodo(null);
+      return;
+    }
+
+    const columnTodos = dragTodosByStatus[targetColumn];
+    const newIndex = columnTodos.findIndex((t) => t.id === activeTodo.id);
+
+    const oldIndex = todos
+      .filter((t) => t.status === targetColumn)
+      .findIndex((t) => t.id === activeTodo.id);
+
+    if (oldIndex === newIndex) {
+      setActiveTodo(null);
+      return;
+    }
+
+    const afterTodo = columnTodos[newIndex + 1];
+    const targetId = afterTodo ? afterTodo.id : null;
+
+    moveTodo(activeTodo.id, targetId, targetColumn);
+
+    setActiveTodo(null);
+  };
 
   return (
-    <div
-      className="grid p-6 gap-x-6 h-full overflow-hidden"
-      data-container
-      style={{
-        gridTemplateColumns: `repeat(${todoColumnTitles.length}, 1fr)`,
-        gridTemplateRows: "auto 1fr",
-      }}
+    <DndContext
+      collisionDetection={rectIntersection}
+      onDragStart={handleDragStart}
+      onDragMove={handleDragMove}
+      onDragEnd={handleDragEnd}
     >
-      {todoColumnTitles.map((title) => {
-        return (
-          <div key={title} className="h-8 mb-4 text-center text-2xl font-bold">
-            {title}
+      <div
+        className="grid p-6 gap-x-6 h-full overflow-visible"
+        style={{ gridTemplateColumns: `repeat(${TableColumns.length}, 1fr)` }}
+      >
+        {TableColumns.map(({ status, title }) => (
+          <div key={status} className="flex flex-col h-full">
+            <div className="h-8 mb-4 text-center text-2xl font-bold">
+              {title}
+            </div>
+            <SortableContext
+              id={status}
+              items={dragTodosByStatus[status].map((todo) => todo.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <TodoList
+                todos={dragTodosByStatus[status]}
+                createTodoForm={status === TODO_STATUS.TODO}
+                type={status}
+              />
+            </SortableContext>
           </div>
-        );
-      })}
+        ))}
+      </div>
 
-      <TodoList
-        todos={todoTodos}
-        createTodoForm={true}
-        type={TODO_STATUS.TODO}
-      />
-      <TodoList
-        todos={inProgressTodos}
-        createTodoForm={false}
-        type={TODO_STATUS.IN_PROCESS}
-      />
-      <TodoList
-        todos={completedTodos}
-        createTodoForm={false}
-        type={TODO_STATUS.COMPLETED}
-      />
-    </div>
+      <DragOverlay style={{ pointerEvents: "none" }}>
+        {activeTodo ? <TodoItem todo={activeTodo} /> : null}
+      </DragOverlay>
+    </DndContext>
   );
 };

@@ -50,6 +50,8 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         text: "List doesn't exist or is empty",
         type: "error",
       });
+
+      localStorage.removeItem("listId");
     } finally {
       useUIStore.getState().setGlobalLoading(false);
     }
