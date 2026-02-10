@@ -4,17 +4,12 @@ import cors from "cors";
 import todosRouter from "./routes/todosRouter";
 import listsRouter from "./routes/listsRouter";
 import notFound from "./middleware/not-found";
-import { env } from "./config/env";
 import { errorHandler } from "./middleware/errorHandler";
+import { corsOptions } from "./config/cors";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: env.CLIENT_URL,
-    credentials: true,
-  }),
-);
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
