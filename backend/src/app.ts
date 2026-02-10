@@ -11,14 +11,6 @@ const app = express();
 
 app.use(cors(corsOptions));
 
-app.use((req, res, next) => {
-  if (req.method === "OPTIONS") {
-    cors(corsOptions)(req, res, next);
-  } else {
-    next();
-  }
-});
-
 app.use(express.json());
 
 app.get("/health", (_req: Request, res: Response) => {
