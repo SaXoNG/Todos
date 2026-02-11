@@ -15,28 +15,28 @@ export const Notification = () => {
   const hideNotification = useNotificationStore(
     (state) => state.hideNotification,
   );
-  const openModal = useModalStore((state) => state.openModal);
 
+  const openModal = useModalStore((state) => state.openModal);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const getSavedLists = (): ListInfoType[] => {
+    const savedLists = localStorage.getItem("savedLists");
+    return savedLists ? JSON.parse(savedLists) : [];
+  };
+
   useEffect(() => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
     if (notification?.type !== "success") {
-      const savedLists = localStorage.getItem("savedLists");
+      const savedListsArray = getSavedLists();
 
-      if (savedLists) {
-        const savedListsArray: ListInfoType[] = JSON.parse(savedLists);
-
+      if (savedListsArray.length > 0) {
         timeoutRef.current = setTimeout(() => {
           showNotification({
             type: "success",
             allLists: savedListsArray,
           });
         }, clearNotifinicationTimeout);
-
         return;
       } else {
         hideNotification();
@@ -44,15 +44,19 @@ export const Notification = () => {
     }
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, [notification, showNotification, hideNotification]);
 
-  if (!notification) {
-    return null;
-  }
+  if (!notification) return null;
+
+  const hanldeShowAllList = () => {
+    openModal({
+      type: "allLists",
+      title: "Your saved lists",
+      allLists: getSavedLists(),
+    });
+  };
 
   const notificationColor: Record<NotificationType["type"], string> = {
     error: "#B91C1C",
@@ -80,13 +84,7 @@ export const Notification = () => {
             color: "#000",
             "&:hover": { bgcolor: "#2e7d32" },
           }}
-          onClick={() => {
-            openModal({
-              type: "allLists",
-              title: "Your saved lists",
-              allLists: notification.allLists ?? [],
-            });
-          }}
+          onClick={hanldeShowAllList}
         >
           Show all lists
         </Button>
