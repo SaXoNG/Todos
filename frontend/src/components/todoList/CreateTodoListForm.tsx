@@ -21,12 +21,16 @@ export const CreateTodoListForm = ({
         variant="outlined"
         color="primary"
         disabled={listTitle.length === 0}
+        disableRipple
+        disableFocusRipple
         sx={{
           width: "auto",
           border: "2px solid black",
           borderColor: "black",
           color: "black",
           fontWeight: "bold",
+          "&:hover": { bgcolor: "#15803d" },
+          "&:focus": { bgcolor: "#166534" },
         }}
       >
         Create list

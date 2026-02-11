@@ -62,12 +62,16 @@ export const FetchTodoListForm = ({
         variant="outlined"
         color="primary"
         disabled={listID.length === 0}
+        disableRipple
+        disableFocusRipple
         sx={{
           width: "auto",
           border: "2px solid black",
           borderColor: "black",
           color: "black",
           fontWeight: "bold",
+          "&:hover": { bgcolor: "#15803d" },
+          "&:focus": { bgcolor: "#166534" },
         }}
       >
         Find list
