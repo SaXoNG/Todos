@@ -32,7 +32,7 @@ export const TodoList = ({
       ))}
 
       {!createTodoForm && todos.length === 0 && (
-        <div className="text-center font-bold text-4xl">Colum is empty</div>
+        <div className="text-center font-bold text-4xl mt-5">Colum is empty</div>
       )}
 
       <div

@@ -45,7 +45,19 @@ export const GlobalInfoModal = () => {
             </Typography>
 
             <Stack direction="row" spacing={2} justifyContent="flex-end">
-              <Button variant="outlined" onClick={closeModal}>
+              <Button
+                variant="outlined"
+                sx={{
+                  color: "#43a047",
+                  borderColor: "#43a047",
+                  "&:hover": {
+                    bgcolor: "#e8f5e9",
+                    borderColor: "#2e7d32",
+                    color: "#2e7d32",
+                  },
+                }}
+                onClick={closeModal}
+              >
                 Close
               </Button>
               <Button
