@@ -7,6 +7,7 @@ export const GlobalInfoModal = () => {
   const { data, closeModal } = useModalStore();
   const [copyButtonText, setCopyButtonText] = useState("Copy ID");
   const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
+  const deleteTodolist = useTodoStore((state) => state.deleteTodolist);
 
   if (!data) return null;
 
@@ -93,23 +94,54 @@ export const GlobalInfoModal = () => {
                         justifyContent: "space-between",
                       }}
                     >
-                      <Typography fontWeight="500">{list.title}</Typography>
+                      {/* Ліва частина з назвою та id */}
+                      <div>
+                        <Typography fontWeight="500">{list.title}</Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {list.id}
+                        </Typography>
+                      </div>
 
-                      <Typography variant="body2" color="text.secondary">
-                        {list.id}
-                      </Typography>
+                      {/* Контейнер для кнопок */}
+                      <Stack direction="row" spacing={1}>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            borderColor: "#43a047",
+                            color: "#43a047",
+                            "&:hover": {
+                              bgcolor: "#e8f5e9",
+                              borderColor: "#2e7d32",
+                              color: "#2e7d32",
+                            },
+                          }}
+                          onClick={() => handleLoadList(list.id)}
+                        >
+                          Load
+                        </Button>
 
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          borderColor: "#43a047",
-                          color: "#43a047",
-                        }}
-                        onClick={() => handleLoadList(list.id)}
-                      >
-                        Load
-                      </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          sx={{
+                            borderColor: "#d32f2f",
+                            color: "#d32f2f",
+                            "&:hover": {
+                              bgcolor: "#ffebee",
+                              borderColor: "#b71c1c",
+                              color: "#b71c1c",
+                            },
+                          }}
+                          onClick={() => {
+                            if (list.id) {
+                              deleteTodolist(list.id);
+                            }
+                          }}
+                        >
+                          Delete List
+                        </Button>
+                      </Stack>
                     </Box>
                   ))}
                 </div>

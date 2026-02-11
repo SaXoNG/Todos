@@ -15,6 +15,7 @@ interface TodosState {
   todos: TodoType[];
   fetchTodoList: (listID: string) => void;
   createTodoList: (value: string) => void;
+  deleteTodolist: (value: string) => void;
   createTodo: (todo: CreateTodoPayload) => void;
   deleteTodo: (value: string) => void;
   updateTodoText: (value: TodoType) => void;
@@ -31,8 +32,6 @@ export const useTodoStore = create<TodosState>((set, get) => ({
   todos: [],
   fetchTodoList: async (listID) => {
     useUIStore.getState().setGlobalLoading(true);
-
-    console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
 
     try {
       const res = await api.get(`/lists/${listID}`);
@@ -83,6 +82,41 @@ export const useTodoStore = create<TodosState>((set, get) => ({
       });
 
       addOrMoveListToFront(id, title);
+    } catch (error) {
+      console.error("Error creating new todo list:", error);
+
+      useNotificationStore.getState().showNotification({
+        title: "Something went wrong",
+        text: "Todo List creation went wrong, try again later!",
+        type: "error",
+      });
+    } finally {
+      useUIStore.getState().setGlobalLoading(false);
+    }
+  },
+  deleteTodolist: async (listId) => {
+    try {
+      useUIStore.getState().setGlobalLoading(true);
+
+      await api.delete(`/lists/${listId}`);
+
+      set({ listInfo: null });
+
+      useModalStore.getState().openModal({
+        type: "single",
+        title: "Your list was deleted!",
+        description: ``,
+        id: listId,
+      });
+
+      const stored = localStorage.getItem("savedLists");
+      if (!stored) return;
+
+      const savedLists: ListInfoType[] = JSON.parse(stored);
+
+      const updatedLists = savedLists.filter((l) => l.id !== listId);
+
+      localStorage.setItem("savedLists", JSON.stringify(updatedLists));
     } catch (error) {
       console.error("Error creating new todo list:", error);
 
