@@ -120,10 +120,6 @@ export const TodoTable = () => {
     const { over } = event;
     if (!over || !activeTodo) return;
 
-    console.log(
-      `State before update: ${JSON.stringify(dragTodosByStatus, null, 2)}`,
-    );
-
     if ((lastOver && over.id === lastOver.id) || over.id === activeTodo.id) {
       return;
     } else {
@@ -171,7 +167,6 @@ export const TodoTable = () => {
       if (currentColumn === targetColumn && oldIndex === newIndex) return prev;
 
       newState[targetColumn].splice(newIndex, 0, activeTodo);
-      console.log(`State is updated: ${JSON.stringify(newState, null, 2)}`);
 
       return newState;
     });
