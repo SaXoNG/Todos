@@ -11,7 +11,15 @@ function moveTodoValidation(req: Request, res: Response, next: NextFunction) {
     throw new BadRequestError("todoId is incorrect");
   }
 
-  if (beforeId && afterId && beforeId === afterId) {
+  if (beforeId === todoId) {
+    throw new BadRequestError("beforeId and todoId cannot be the same");
+  }
+
+  if (afterId === todoId) {
+    throw new BadRequestError("afterId and todoId cannot be the same");
+  }
+
+  if (beforeId === afterId) {
     throw new BadRequestError("beforeId and afterId cannot be the same");
   }
 
