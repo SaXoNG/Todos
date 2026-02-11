@@ -225,19 +225,12 @@ export const useTodoStore = create<TodosState>((set, get) => ({
       preparedPayload.status = newStatus;
     }
 
-    console.log(prevTodos.find((t) => t.id === todoId));
-
     try {
       useUIStore.getState().setLoadingTodoId(todoId);
 
       const { data: updatedTodo } = await api.patch(
         `/todos/${todoId}/move`,
         preparedPayload,
-      );
-
-      console.log(updatedTodo);
-      console.log(
-        prevTodos.map((t) => (t.id === updatedTodo.id ? updatedTodo : t)),
       );
 
       set({
