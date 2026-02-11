@@ -1,5 +1,3 @@
-"use client";
-
 import { useRef, useState, type JSX } from "react";
 import { useTodoStore } from "../../storage/todoStore";
 import { useNotificationStore } from "../../storage/notificationStore";

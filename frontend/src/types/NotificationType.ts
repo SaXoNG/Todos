@@ -1,5 +1,8 @@
+import type { ListInfoType } from "./TodoListType";
+
 export type NotificationType = {
-  title: string;
+  title?: string;
   text?: string;
-  type: "error" | "success" | 'warning';
+  type: "error" | "success" | "warning";
+  allLists?: ListInfoType[];
 };

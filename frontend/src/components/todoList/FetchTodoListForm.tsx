@@ -18,6 +18,7 @@ export const FetchTodoListForm = ({
       className="flex-1 flex h-full gap-2"
     >
       <TextField
+        className="autofill-fix"
         label="List ID"
         variant="outlined"
         value={listID}
@@ -30,18 +31,32 @@ export const FetchTodoListForm = ({
               borderWidth: 2,
             },
             "&:hover fieldset": {
-              borderColor: "#134e4a",
+              borderColor: "black",
             },
             "&.Mui-focused fieldset": {
-              borderColor: "#134e4a",
-              borderWidth: 2,
+              borderColor: "black",
             },
           },
+          "& .MuiInputBase-input": {
+            color: "black",
+            "&::placeholder": {
+              color: "#555555 !important",
+              opacity: 1,
+            },
+          },
+          "& .MuiInputLabel-root": {
+            color: "#000 !important",
+            opacity: 1,
+          },
           "& .MuiInputLabel-root.Mui-focused": {
-            color: "#134e4a",
+            color: "black",
+          },
+          "& .MuiInputLabel-root.MuiInputLabel-shrink": {
+            color: "black",
           },
         }}
       />
+
       <Button
         type="submit"
         variant="outlined"

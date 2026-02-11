@@ -30,6 +30,7 @@ export const CreateTodoForm = ({
     >
       <h1 className="text-center text-xl">New Todo</h1>
       <TextField
+        className="autofill-fix"
         label="Title"
         inputRef={inputRef}
         variant="outlined"
@@ -43,19 +44,34 @@ export const CreateTodoForm = ({
               borderWidth: 2,
             },
             "&:hover fieldset": {
-              borderColor: "#134e4a",
+              borderColor: "black",
             },
             "&.Mui-focused fieldset": {
-              borderColor: "#134e4a",
-              borderWidth: 2,
+              borderColor: "black",
             },
           },
+          "& .MuiInputBase-input": {
+            color: "black",
+            "&::placeholder": {
+              color: "#555555 !important",
+              opacity: 1,
+            },
+          },
+          "& .MuiInputLabel-root": {
+            color: "#000 !important",
+          },
           "& .MuiInputLabel-root.Mui-focused": {
-            color: "#134e4a",
+            color: "black",
+          },
+          "& .MuiInputLabel-root.MuiInputLabel-shrink": {
+            color: "black",
           },
         }}
+        placeholder="Enter title"
       />
+
       <TextField
+        className="autofill-fix"
         label="Description"
         variant="outlined"
         multiline
@@ -64,6 +80,7 @@ export const CreateTodoForm = ({
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         fullWidth
+        placeholder="Enter description"
         sx={{
           "& .MuiOutlinedInput-root": {
             "& fieldset": {
@@ -71,21 +88,38 @@ export const CreateTodoForm = ({
               borderWidth: 2,
             },
             "&:hover fieldset": {
-              borderColor: "#134e4a",
+              borderColor: "black",
             },
             "&.Mui-focused fieldset": {
-              borderColor: "#134e4a",
+              borderColor: "black",
             },
           },
           "& .MuiInputBase-input": {
             fontWeight: 400,
-            fontSize: "14px",
+            fontSize: "16px",
+            color: "black",
+            "&::placeholder": {
+              color: "#555555 !important",
+              opacity: 1,
+            },
+          },
+          "& .MuiInputLabel-root": {
+            color: "#000 !important",
+            opacity: 1,
           },
           "& .MuiInputLabel-root.Mui-focused": {
-            color: "#134e4a",
+            color: "black",
+            "&::placeholder": {
+              color: "#555555 !important",
+              opacity: 1,
+            },
+          },
+          "& .MuiInputLabel-root.MuiInputLabel-shrink": {
+            color: "black",
           },
         }}
       />
+
       <div className="flex w-ful gap-2">
         <Button
           type="button"

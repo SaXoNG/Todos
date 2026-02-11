@@ -7,6 +7,8 @@ import type { CreateTodoPayload } from "../types/CreateTodoPayload";
 import type { TodoType, TODO_STATUS } from "../types/TodoType";
 import type { MoveTodoPayload } from "../types/moveTodoPayload";
 import { api } from "../api/axios";
+import { useModalStore } from "./modalStore";
+import { addOrMoveListToFront } from "../utils/addOrMoveListToFront";
 
 interface TodosState {
   listInfo: ListInfoType | null;
@@ -30,6 +32,8 @@ export const useTodoStore = create<TodosState>((set, get) => ({
   fetchTodoList: async (listID) => {
     useUIStore.getState().setGlobalLoading(true);
 
+    console.log("VITE_API_URL:", import.meta.env.VITE_API_URL);
+
     try {
       const res = await api.get(`/lists/${listID}`);
       const { id, title, todos } = res.data;
@@ -42,7 +46,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         todos: todos,
       });
 
-      localStorage.setItem("listId", id);
+      addOrMoveListToFront(id, title);
     } catch (err) {
       console.error("Error fetching todo list from server:", err);
 
@@ -70,13 +74,15 @@ export const useTodoStore = create<TodosState>((set, get) => ({
 
       set({ listInfo: { id, title }, todos: [] });
 
-      useNotificationStore.getState().showNotification({
-        title: "New list created. Save this ID!!!",
-        text: id,
-        type: "success",
+      useModalStore.getState().openModal({
+        type: "single",
+        title: "Your new list is ready! 🎉",
+        description: `Here’s the ID: ${id}
+          Keep it safe so you can access it anytime.`,
+        id,
       });
 
-      localStorage.setItem("listId", id);
+      addOrMoveListToFront(id, title);
     } catch (error) {
       console.error("Error creating new todo list:", error);
 
@@ -185,12 +191,19 @@ export const useTodoStore = create<TodosState>((set, get) => ({
       preparedPayload.status = newStatus;
     }
 
+    console.log(prevTodos.find((t) => t.id === todoId));
+
     try {
       useUIStore.getState().setLoadingTodoId(todoId);
 
       const { data: updatedTodo } = await api.patch(
         `/todos/${todoId}/move`,
         preparedPayload,
+      );
+
+      console.log(updatedTodo);
+      console.log(
+        prevTodos.map((t) => (t.id === updatedTodo.id ? updatedTodo : t)),
       );
 
       set({

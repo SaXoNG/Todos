@@ -7,13 +7,14 @@ import { useUIStore } from "../../storage/UIStore";
 import { useNotificationStore } from "../../storage/notificationStore";
 import { IconBtn } from "../IconBtn";
 import { Loader } from "../Loader";
-import { TodoEditForm } from "./TodoEditForm";
-import type { TodoType } from "../../types/TodoType";
+import { EditTodoForm } from "./EditTodoForm";
+import { TODO_STATUS, type TodoType } from "../../types/TodoType";
 
 type Props = { todo: TodoType };
 
 export const TodoItem = ({ todo }: Props): JSX.Element => {
   const { id, title, description } = todo;
+  const loadingTodoId = useUIStore((state) => state.loadingTodoId);
 
   const {
     attributes,
@@ -22,7 +23,7 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: todo.id });
+  } = useSortable({ id: todo.id, disabled: !!loadingTodoId });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -31,7 +32,6 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
     cursor: "grab",
   };
 
-  const loadingTodoId = useUIStore((state) => state.loadingTodoId);
   const deleteTodo = useTodoStore((state) => state.deleteTodo);
   const updateTodoText = useTodoStore((state) => state.updateTodoText);
   const showNotification = useNotificationStore(
@@ -78,7 +78,7 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
   };
 
   return isEditText ? (
-    <TodoEditForm
+    <EditTodoForm
       handleUpdateTodoText={handleUpdateTodoText}
       inputRef={inputRef}
       newTitle={newTitle}
@@ -93,7 +93,11 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
       {...attributes}
       {...listeners}
       style={style}
-      className="relative flex flex-col gap-2 bg-gray-400 p-2 rounded"
+      className={`relative flex flex-col gap-2 bg-gray-400 p-2 rounded ${
+        todo.status === TODO_STATUS.COMPLETED
+          ? "opacity-50 line-through text-gray-700"
+          : ""
+      }`}
     >
       {loadingTodoId === id && <Loader />}
       <div className="flex justify-between items-start">

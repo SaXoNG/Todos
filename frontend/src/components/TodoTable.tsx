@@ -16,6 +16,8 @@ import { useUIStore } from "../storage/UIStore";
 import { Loader } from "./Loader";
 import { TODO_STATUS, type TodoType } from "../types/TodoType";
 import { TodoItem } from "./todo/TodoItem";
+import type { ListInfoType } from "../types/TodoListType";
+import { useNotificationStore } from "../storage/notificationStore";
 
 const TableColumns = [
   { status: TODO_STATUS.TODO, title: "ToDo" },
@@ -25,6 +27,9 @@ const TableColumns = [
 
 export const TodoTable = () => {
   const setGlobalLoading = useUIStore((state) => state.setGlobalLoading);
+  const showNotification = useNotificationStore(
+    (state) => state.showNotification,
+  );
   const loadingTodoId = useUIStore((state) => state.loadingTodoId);
   const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
   const moveTodo = useTodoStore((state) => state.moveTodo);
@@ -44,15 +49,37 @@ export const TodoTable = () => {
   });
 
   useEffect(() => {
-    const listId = localStorage.getItem("listId");
-    if (!listId) {
+    const savedLists = localStorage.getItem("savedLists");
+
+    if (!savedLists) {
       setGlobalLoading(false);
       return;
     }
-    fetchTodoList(listId);
-  }, [fetchTodoList, setGlobalLoading]);
+
+    const savedListsArray: ListInfoType[] = JSON.parse(savedLists);
+
+    if (savedListsArray.length === 0) {
+      setGlobalLoading(false);
+      return;
+    }
+
+    const firstListId = savedListsArray[0].id;
+
+    if (firstListId) {
+      fetchTodoList(firstListId);
+    }
+
+    showNotification({
+      type: "success",
+      allLists: savedListsArray,
+    });
+  }, [fetchTodoList, setGlobalLoading, showNotification]);
 
   useEffect(() => {
+    if (!todos) {
+      return;
+    }
+
     const sortedTodos = [...todos].sort((a, b) => a.position - b.position);
     setDragTodosByStatus({
       [TODO_STATUS.TODO]: sortedTodos.filter(
@@ -65,8 +92,6 @@ export const TodoTable = () => {
         (t) => t.status === TODO_STATUS.COMPLETED,
       ),
     });
-
-    console.log(sortedTodos);
   }, [todos]);
 
   if (globalLoading) {
@@ -94,6 +119,10 @@ export const TodoTable = () => {
   const handleDragMove = (event: DragMoveEvent) => {
     const { over } = event;
     if (!over || !activeTodo) return;
+
+    console.log(
+      `State before update: ${JSON.stringify(dragTodosByStatus, null, 2)}`,
+    );
 
     if ((lastOver && over.id === lastOver.id) || over.id === activeTodo.id) {
       return;
@@ -142,6 +171,7 @@ export const TodoTable = () => {
       if (currentColumn === targetColumn && oldIndex === newIndex) return prev;
 
       newState[targetColumn].splice(newIndex, 0, activeTodo);
+      console.log(`State is updated: ${JSON.stringify(newState, null, 2)}`);
 
       return newState;
     });
@@ -150,6 +180,7 @@ export const TodoTable = () => {
   const handleDragEnd = ({ over }: DragEndEvent) => {
     if (!activeTodo || !over) {
       setActiveTodo(null);
+      setLastOver(null);
       return;
     }
 
@@ -166,6 +197,7 @@ export const TodoTable = () => {
 
     if (!targetStatus) {
       setActiveTodo(null);
+      setLastOver(null);
       return;
     }
 
@@ -179,9 +211,8 @@ export const TodoTable = () => {
     const oldIndex = oldTodos.findIndex((t) => t.id === activeTodo.id);
 
     if (activeTodo.status === targetStatus && oldIndex === newIndex) {
-      console.log("Hi there");
-
       setActiveTodo(null);
+      setLastOver(null);
       return;
     }
 
@@ -193,6 +224,7 @@ export const TodoTable = () => {
     moveTodo(activeTodo.id, beforeId, afterId, targetStatus);
 
     setActiveTodo(null);
+    setLastOver(null);
   };
 
   return (

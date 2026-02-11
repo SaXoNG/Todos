@@ -30,3 +30,9 @@ body {
 *::-webkit-scrollbar-track {
   background: transparent;
 }
+
+.autofill-fix input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px inherit inset !important;
+  -webkit-text-fill-color: inherit !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}

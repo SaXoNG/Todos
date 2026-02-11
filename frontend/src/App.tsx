@@ -1,6 +1,7 @@
 import { Header } from "./components/Header";
 import { Topbar } from "./components/Topbar";
 import { TodoTable } from "./components/TodoTable";
+import { GlobalInfoModal } from "./components/GlobalInfoModal";
 
 function App() {
   return (
@@ -8,6 +9,7 @@ function App() {
       <Header />
       <Topbar />
       <TodoTable />
+      <GlobalInfoModal />
     </div>
   );
 }
