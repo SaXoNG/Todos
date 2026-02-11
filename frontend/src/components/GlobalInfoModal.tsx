@@ -4,8 +4,10 @@ import { useModalStore } from "../storage/modalStore";
 import { useState } from "react";
 
 export const GlobalInfoModal = () => {
-  const { data, closeModal } = useModalStore();
+  const data = useModalStore((state) => state.data);
+  const closeModal = useModalStore((state) => state.closeModal);
   const [copyButtonText, setCopyButtonText] = useState("Copy ID");
+  const todos = useTodoStore((state) => state.todos);
   const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
   const deleteTodolist = useTodoStore((state) => state.deleteTodolist);
 
@@ -61,16 +63,18 @@ export const GlobalInfoModal = () => {
               >
                 Close
               </Button>
-              <Button
-                variant="contained"
-                sx={{ bgcolor: "#43a047", "&:hover": { bgcolor: "#2e7d32" } }}
-                onClick={() => {
-                  navigator.clipboard.writeText(data.id);
-                  setCopyButtonText("Copied");
-                }}
-              >
-                {copyButtonText}
-              </Button>
+              {todos.find((t) => t.id === data.id) && (
+                <Button
+                  variant="contained"
+                  sx={{ bgcolor: "#43a047", "&:hover": { bgcolor: "#2e7d32" } }}
+                  onClick={() => {
+                    navigator.clipboard.writeText(data.id);
+                    setCopyButtonText("Copied");
+                  }}
+                >
+                  {copyButtonText}
+                </Button>
+              )}
             </Stack>
           </>
         )}
@@ -94,7 +98,6 @@ export const GlobalInfoModal = () => {
                         justifyContent: "space-between",
                       }}
                     >
-                      {/* Ліва частина з назвою та id */}
                       <div>
                         <Typography fontWeight="500">{list.title}</Typography>
                         <Typography variant="body2" color="text.secondary">
@@ -102,7 +105,6 @@ export const GlobalInfoModal = () => {
                         </Typography>
                       </div>
 
-                      {/* Контейнер для кнопок */}
                       <Stack direction="row" spacing={1}>
                         <Button
                           size="small"
