@@ -8,7 +8,7 @@ import type { TodoType, TODO_STATUS } from "../types/TodoType";
 import type { MoveTodoPayload } from "../types/moveTodoPayload";
 import { api } from "../api/axios";
 import { useModalStore } from "./modalStore";
-import { addOrMoveListToFront } from "../utils/addOrMoveListToFront";
+import { useSavedListsStore } from "./savedListsStore";
 
 interface TodosState {
   listInfo: ListInfoType | null;
@@ -45,7 +45,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         todos: todos,
       });
 
-      addOrMoveListToFront(id, title);
+      useSavedListsStore.getState().addOrMoveToFront({ id, title });
     } catch (err) {
       console.error("Error fetching todo list from server:", err);
 
@@ -55,45 +55,46 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         type: "error",
       });
 
-      localStorage.removeItem("listId");
     } finally {
       useUIStore.getState().setGlobalLoading(false);
     }
   },
 
-  createTodoList: async (listTitle) => {
+  createTodoList: async (listTitle: string) => {
+    const uiStore = useUIStore.getState();
+    const modalStore = useModalStore.getState();
+    const notificationStore = useNotificationStore.getState();
+    const savedListsStore = useSavedListsStore.getState();
+
     try {
-      useUIStore.getState().setGlobalLoading(true);
+      uiStore.setGlobalLoading(true);
 
-      const res = await api.post(`/lists`, {
-        title: listTitle,
-      });
-
+      const res = await api.post("/lists", { title: listTitle });
       const { id, title } = res.data;
 
       set({ listInfo: { id, title }, todos: [] });
 
-      useModalStore.getState().openModal({
+      modalStore.openModal({
         type: "single",
         title: "Your new list is ready! 🎉",
-        description: `Here’s the ID: ${id}
-          Keep it safe so you can access it anytime.`,
+        description: `Here’s the ID: ${id}\nKeep it safe so you can access it anytime.`,
         id,
       });
 
-      addOrMoveListToFront(id, title);
+      savedListsStore.addOrMoveToFront({ id, title });
     } catch (error) {
       console.error("Error creating new todo list:", error);
 
-      useNotificationStore.getState().showNotification({
+      notificationStore.showNotification({
         title: "Something went wrong",
         text: "Todo List creation went wrong, try again later!",
         type: "error",
       });
     } finally {
-      useUIStore.getState().setGlobalLoading(false);
+      uiStore.setGlobalLoading(false);
     }
   },
+
   deleteTodolist: async (listId) => {
     try {
       useUIStore.getState().setGlobalLoading(true);
@@ -109,14 +110,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         id: listId,
       });
 
-      const stored = localStorage.getItem("savedLists");
-      if (!stored) return;
-
-      const savedLists: ListInfoType[] = JSON.parse(stored);
-
-      const updatedLists = savedLists.filter((l) => l.id !== listId);
-
-      localStorage.setItem("savedLists", JSON.stringify(updatedLists));
+      useSavedListsStore.getState().removeList(listId);
     } catch (error) {
       console.error("Error creating new todo list:", error);
 

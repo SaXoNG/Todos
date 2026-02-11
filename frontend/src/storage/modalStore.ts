@@ -1,29 +1,22 @@
 import { create } from "zustand";
 import type { ListInfoType } from "../types/TodoListType";
 
-type SingleModal = {
-  type: "single";
-  title: string;
-  description: string;
-  id: string;
-};
-
-type AllListsModal = {
-  type: "allLists";
-  title: string;
-  allLists: ListInfoType[];
-};
-
-export type ModalData = SingleModal | AllListsModal;
+type ModalData =
+  | { type: "single"; id: string; title: string; description?: string }
+  | {
+      type: "allLists";
+      title: string;
+      allLists: ListInfoType[];
+    };
 
 type ModalStore = {
   data: ModalData | null;
-  openModal: (modal: ModalData) => void;
+  openModal: (data: ModalData) => void;
   closeModal: () => void;
 };
 
 export const useModalStore = create<ModalStore>((set) => ({
   data: null,
-  openModal: (modal) => set({ data: modal }),
+  openModal: (data) => set({ data }),
   closeModal: () => set({ data: null }),
 }));

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useTodoStore } from "../storage/todoStore";
-import { useNotificationStore } from "../storage/notificationStore";
-import isValidUUID from "../utils/validationListID";
-import { FetchTodoListForm } from "./todoList/FetchTodoListForm";
-import { CreateTodoListForm } from "./todoList/CreateTodoListForm";
+import { useTodoStore } from "../../storage/todoStore";
+import { useNotificationStore } from "../../storage/notificationStore";
+import { isValidObjectId } from "../../utils/isValidObjectId";
+import { FetchTodoListForm } from "../todo-table/FetchTodoListForm";
+import { CreateTodoListForm } from "../todo-table/CreateTodoListForm";
 
 export const Topbar = () => {
   const todosList = useTodoStore((state) => state.listInfo);
@@ -32,10 +32,10 @@ export const Topbar = () => {
       return;
     }
 
-    if (!isValidUUID(listID)) {
+    if (!isValidObjectId(listID)) {
       showNotification({
         title: "Invalid listID",
-        text: "Example: 9cbe7d38-4eab-46c3-bd95-53624e5b6d51",
+        text: "Example: 69ad0aab277e57185e486c75",
         type: "error",
       });
 

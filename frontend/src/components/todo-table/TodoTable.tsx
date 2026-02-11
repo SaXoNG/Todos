@@ -9,15 +9,13 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { useEffect, useState } from "react";
-
-import { TodoList } from "./todoList/TodoList";
-import { useTodoStore } from "../storage/todoStore";
-import { useUIStore } from "../storage/UIStore";
-import { Loader } from "./Loader";
-import { TODO_STATUS, type TodoType } from "../types/TodoType";
-import { TodoItem } from "./todo/TodoItem";
-import type { ListInfoType } from "../types/TodoListType";
-import { useNotificationStore } from "../storage/notificationStore";
+import { TODO_STATUS, type TodoType } from "../../types/TodoType";
+import { useUIStore } from "../../storage/UIStore";
+import { useTodoStore } from "../../storage/todoStore";
+import { useSavedListsStore } from "../../storage/savedListsStore";
+import { Loader } from "../Loader";
+import { TodoList } from "./TodoList";
+import { TodoItem } from "../todo/TodoItem";
 
 const TableColumns = [
   { status: TODO_STATUS.TODO, title: "ToDo" },
@@ -27,9 +25,7 @@ const TableColumns = [
 
 export const TodoTable = () => {
   const setGlobalLoading = useUIStore((state) => state.setGlobalLoading);
-  const showNotification = useNotificationStore(
-    (state) => state.showNotification,
-  );
+
   const loadingTodoId = useUIStore((state) => state.loadingTodoId);
   const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
   const moveTodo = useTodoStore((state) => state.moveTodo);
@@ -49,31 +45,19 @@ export const TodoTable = () => {
   });
 
   useEffect(() => {
-    const savedLists = localStorage.getItem("savedLists");
+    const savedLists = useSavedListsStore.getState().savedLists;
 
-    if (!savedLists) {
+    if (savedLists.length === 0) {
       setGlobalLoading(false);
       return;
     }
 
-    const savedListsArray: ListInfoType[] = JSON.parse(savedLists);
-
-    if (savedListsArray.length === 0) {
-      setGlobalLoading(false);
-      return;
-    }
-
-    const firstListId = savedListsArray[0].id;
+    const firstListId = savedLists[0]?.id;
 
     if (firstListId) {
       fetchTodoList(firstListId);
     }
-
-    showNotification({
-      type: "success",
-      allLists: savedListsArray,
-    });
-  }, [fetchTodoList, setGlobalLoading, showNotification]);
+  }, [fetchTodoList, setGlobalLoading]);
 
   useEffect(() => {
     if (!todos) {

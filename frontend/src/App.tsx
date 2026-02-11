@@ -1,7 +1,7 @@
-import { Header } from "./components/Header";
-import { Topbar } from "./components/Topbar";
-import { TodoTable } from "./components/TodoTable";
-import { GlobalInfoModal } from "./components/GlobalInfoModal";
+import { Header } from "./components/header/Header";
+import { Topbar } from "./components/header/Topbar";
+import { GlobalModal } from "./components/modals/GlobalModal";
+import { TodoTable } from "./components/todo-table/TodoTable";
 
 function App() {
   return (
@@ -9,7 +9,7 @@ function App() {
       <Header />
       <Topbar />
       <TodoTable />
-      <GlobalInfoModal />
+      <GlobalModal />
     </div>
   );
 }
