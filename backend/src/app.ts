@@ -9,11 +9,16 @@ import { corsOptions } from "./config/cors";
 
 const app = express();
 
-// app.use(cors(corsOptions));
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use(express.json());
-
+app.get("/", (_req: Request, res: Response) => {
+  res.status(200).json({
+    status: "ok",
+    message: "Server is running",
+    version: "1.0.0",
+  });
+});
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({ status: "ok" });
 });
