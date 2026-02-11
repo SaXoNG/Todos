@@ -18,8 +18,9 @@ interface TodosState {
   updateTodoText: (value: TodoType) => void;
   moveTodo: (
     todoId: string,
+    beforeId: string | null,
     targetId: string | null,
-    newStatus?: TODO_STATUS,
+    newStatus: TODO_STATUS,
   ) => void;
 }
 
@@ -159,8 +160,9 @@ export const useTodoStore = create<TodosState>((set, get) => ({
 
   moveTodo: async (
     todoId: string,
+    beforeId: string | null,
     targetId: string | null,
-    newStatus?: TODO_STATUS,
+    newStatus: TODO_STATUS,
   ) => {
     const currTodos = get().todos;
     if (!currTodos) {
@@ -168,67 +170,20 @@ export const useTodoStore = create<TodosState>((set, get) => ({
     }
 
     const prevTodos = currTodos.map((t) => ({ ...t }));
-
-    const todoToUpdate = currTodos.find((t) => t.id === todoId);
-    if (!todoToUpdate) {
-      return;
-    }
-
-    const targetStatus = newStatus ?? todoToUpdate.status;
-
-    const filteredTodos = currTodos
-      .filter((t) => t.id !== todoId && t.status === targetStatus)
-      .sort((a, b) => a.position - b.position);
-
+    const todoToUpdate = currTodos.find((todo) => todo.id === todoId);
     const preparedPayload: MoveTodoPayload = { todoId };
 
-    let beforeTodo: TodoType | null = null;
-    let afterTodo: TodoType | null = null;
+    if (beforeId) {
+      preparedPayload.beforeId = beforeId;
+    }
 
     if (targetId) {
-      afterTodo = filteredTodos.find((t) => t.id === targetId) ?? null;
-
-      if (afterTodo) {
-        const index = filteredTodos.findIndex((t) => t.id === targetId);
-        beforeTodo = index > 0 ? filteredTodos[index - 1] : null;
-
-        preparedPayload.afterId = afterTodo.id;
-        if (beforeTodo) {
-          preparedPayload.beforeId = beforeTodo.id;
-        }
-      }
-    } else if (filteredTodos.length > 0) {
-      beforeTodo = filteredTodos[filteredTodos.length - 1];
-      preparedPayload.beforeId = beforeTodo.id;
+      preparedPayload.afterId = targetId;
     }
 
-    let newPosition: number;
-
-    if (beforeTodo && afterTodo) {
-      newPosition = (beforeTodo.position + afterTodo.position) / 2;
-    } else if (!beforeTodo && afterTodo) {
-      newPosition = afterTodo.position - 1000;
-    } else if (beforeTodo && !afterTodo) {
-      newPosition = beforeTodo.position + 1000;
-    } else {
-      newPosition = 0;
-    }
-
-    if (newStatus !== undefined && newStatus !== todoToUpdate.status) {
+    if (newStatus !== todoToUpdate?.status) {
       preparedPayload.status = newStatus;
     }
-
-    const optimisticTodos = currTodos.map((t) =>
-      t.id === todoId
-        ? {
-            ...t,
-            position: newPosition,
-            status: newStatus ? newStatus : t.status,
-          }
-        : t,
-    );
-
-    set({ todos: optimisticTodos });
 
     try {
       useUIStore.getState().setLoadingTodoId(todoId);
@@ -239,9 +194,9 @@ export const useTodoStore = create<TodosState>((set, get) => ({
       );
 
       set({
-        todos: get().todos?.map((t) =>
-          t.id === updatedTodo.id ? updatedTodo : t,
-        ),
+        todos: prevTodos
+          .map((t) => (t.id === updatedTodo.id ? updatedTodo : t))
+          .sort((t1, t2) => t1.position - t2.position),
       });
     } catch (error) {
       console.error("Error updating todo:", error);

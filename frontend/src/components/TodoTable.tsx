@@ -1,5 +1,9 @@
-import { DndContext, rectIntersection, DragOverlay } from "@dnd-kit/core";
-import type { DragStartEvent, DragMoveEvent } from "@dnd-kit/core";
+import { DndContext, closestCenter, DragOverlay } from "@dnd-kit/core";
+import type {
+  DragStartEvent,
+  DragMoveEvent,
+  DragEndEvent,
+} from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
@@ -21,6 +25,7 @@ const TableColumns = [
 
 export const TodoTable = () => {
   const setGlobalLoading = useUIStore((state) => state.setGlobalLoading);
+  const loadingTodoId = useUIStore((state) => state.loadingTodoId);
   const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
   const moveTodo = useTodoStore((state) => state.moveTodo);
 
@@ -29,6 +34,7 @@ export const TodoTable = () => {
   const todos = useTodoStore((state) => state.todos);
 
   const [activeTodo, setActiveTodo] = useState<TodoType | null>(null);
+  const [lastOver, setLastOver] = useState<{ id: string } | null>(null);
   const [dragTodosByStatus, setDragTodosByStatus] = useState<
     Record<TODO_STATUS, TodoType[]>
   >({
@@ -59,6 +65,8 @@ export const TodoTable = () => {
         (t) => t.status === TODO_STATUS.COMPLETED,
       ),
     });
+
+    console.log(sortedTodos);
   }, [todos]);
 
   if (globalLoading) {
@@ -86,6 +94,12 @@ export const TodoTable = () => {
   const handleDragMove = (event: DragMoveEvent) => {
     const { over } = event;
     if (!over || !activeTodo) return;
+
+    if ((lastOver && over.id === lastOver.id) || over.id === activeTodo.id) {
+      return;
+    } else {
+      setLastOver({ id: String(over.id) });
+    }
 
     setDragTodosByStatus((prev) => {
       const currentColumn = activeTodo.status;
@@ -133,50 +147,67 @@ export const TodoTable = () => {
     });
   };
 
-  const handleDragEnd = () => {
-    if (!activeTodo) return;
-
-    const targetColumn = (Object.keys(dragTodosByStatus) as TODO_STATUS[]).find(
-      (col) => dragTodosByStatus[col].some((t) => t.id === activeTodo.id),
-    );
-    if (!targetColumn) {
+  const handleDragEnd = ({ over }: DragEndEvent) => {
+    if (!activeTodo || !over) {
       setActiveTodo(null);
       return;
     }
 
-    const columnTodos = dragTodosByStatus[targetColumn];
-    const newIndex = columnTodos.findIndex((t) => t.id === activeTodo.id);
+    let targetStatus: TODO_STATUS | null = null;
 
-    const oldIndex = todos
-      .filter((t) => t.status === targetColumn)
-      .findIndex((t) => t.id === activeTodo.id);
+    if (String(over.id).startsWith("column-target-")) {
+      targetStatus = String(over.id).replace(
+        "column-target-",
+        "",
+      ) as TODO_STATUS;
+    } else if (over.data.current?.sortable?.containerId) {
+      targetStatus = over.data.current.sortable.containerId as TODO_STATUS;
+    }
 
-    if (oldIndex === newIndex) {
+    if (!targetStatus) {
       setActiveTodo(null);
       return;
     }
 
-    const afterTodo = columnTodos[newIndex + 1];
-    const targetId = afterTodo ? afterTodo.id : null;
+    const newTodos = dragTodosByStatus[targetStatus];
+    const newIndex = newTodos.findIndex((t) => t.id === activeTodo.id);
 
-    moveTodo(activeTodo.id, targetId, targetColumn);
+    const oldTodos = todos
+      .filter((t) => t.status === activeTodo.status)
+      .sort((a, b) => a.position - b.position);
+
+    const oldIndex = oldTodos.findIndex((t) => t.id === activeTodo.id);
+
+    if (activeTodo.status === targetStatus && oldIndex === newIndex) {
+      console.log("Hi there");
+
+      setActiveTodo(null);
+      return;
+    }
+
+    const beforeId = newIndex > 0 ? newTodos[newIndex - 1].id : null;
+
+    const afterId =
+      newIndex < newTodos.length - 1 ? newTodos[newIndex + 1].id : null;
+
+    moveTodo(activeTodo.id, beforeId, afterId, targetStatus);
 
     setActiveTodo(null);
   };
 
   return (
     <DndContext
-      collisionDetection={rectIntersection}
-      onDragStart={handleDragStart}
-      onDragMove={handleDragMove}
-      onDragEnd={handleDragEnd}
+      collisionDetection={closestCenter}
+      onDragStart={loadingTodoId ? undefined : handleDragStart}
+      onDragMove={loadingTodoId ? undefined : handleDragMove}
+      onDragEnd={loadingTodoId ? undefined : handleDragEnd}
     >
       <div
-        className="grid p-6 gap-x-6 h-full overflow-visible"
+        className="grid p-6 gap-x-6 h-full overflow-hidden"
         style={{ gridTemplateColumns: `repeat(${TableColumns.length}, 1fr)` }}
       >
         {TableColumns.map(({ status, title }) => (
-          <div key={status} className="flex flex-col h-full">
+          <div key={status} className="flex flex-col h-full overflow-hidden">
             <div className="h-8 mb-4 text-center text-2xl font-bold">
               {title}
             </div>

@@ -22,7 +22,7 @@ export const TodoList = ({
   });
 
   return (
-    <div className="col-span-1 h-full flex flex-col border-3 p-5 pt-0 rounded">
+    <div className="col-span-1 h-full flex flex-col  border-3 p-5 pt-0 rounded overflow-auto">
       {createTodoForm && <CreateTodo firstTodoId={todos[0]?.id} />}
 
       {todos.map((todo) => (
@@ -40,7 +40,7 @@ export const TodoList = ({
         {...attributes}
         {...listeners}
         data-column={type}
-        className="flex-1"
+        className="flex-1 cursor-grab"
       />
     </div>
   );
