@@ -32,7 +32,14 @@ export const SavedListsModal = ({ allLists, onClose }: SavedListsProps) => {
   return allLists.length === 0 ? (
     <Typography textAlign="center">No saved lists yet.</Typography>
   ) : (
-    <Stack spacing={2}>
+    <Stack
+      spacing={2}
+      sx={{
+        maxHeight: 400,
+        overflowY: "auto",
+        pr: 1,
+      }}
+    >
       {allLists.map((list) => (
         <Box
           key={list.id}
@@ -57,6 +64,10 @@ export const SavedListsModal = ({ allLists, onClose }: SavedListsProps) => {
               size="small"
               variant="outlined"
               onClick={() => handleLoad(list.id)}
+              sx={{
+                borderColor: "#388e3c",
+                color: "#388e3c",
+              }}
             >
               Load
             </Button>
