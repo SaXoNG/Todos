@@ -77,7 +77,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
       modalStore.openModal({
         type: "single",
         title: "Your new list is ready! 🎉",
-        description: `Here’s the ID: ${id}\nKeep it safe so you can access it anytime.`,
+        description: `Here’s the ID: ${id}\nKeep it safe so you can access it anywhere.`,
         id,
       });
 

@@ -1,6 +1,6 @@
 import { Typography, Button, Stack } from "@mui/material";
-import { useState } from "react";
 import { useSavedListsStore } from "../../storage/savedListsStore";
+import { useNotificationStore } from "../../storage/notificationStore";
 
 export type SingleModalProps = {
   id: string;
@@ -14,7 +14,6 @@ export const SingleTodoContent = ({
   onClose,
 }: SingleModalProps) => {
   const savedLists = useSavedListsStore((state) => state.savedLists);
-  const [copyText, setCopyText] = useState("Copy ID");
 
   return (
     <>
@@ -41,7 +40,9 @@ export const SingleTodoContent = ({
             variant="contained"
             onClick={() => {
               navigator.clipboard.writeText(id);
-              setCopyText("Copied");
+              useNotificationStore
+                .getState()
+                .showNotification({ type: "success", title: "ID was copied" });
             }}
             sx={{
               backgroundColor: "#388e3c",
@@ -51,7 +52,7 @@ export const SingleTodoContent = ({
               },
             }}
           >
-            {copyText}
+            Copy
           </Button>
         )}
       </Stack>

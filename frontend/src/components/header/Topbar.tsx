@@ -4,6 +4,7 @@ import { useNotificationStore } from "../../storage/notificationStore";
 import { isValidObjectId } from "../../utils/isValidObjectId";
 import { FetchTodoListForm } from "../todo-table/FetchTodoListForm";
 import { CreateTodoListForm } from "../todo-table/CreateTodoListForm";
+import { ShowAllListsButton } from "./showAllListsButton";
 
 export const Topbar = () => {
   const todosList = useTodoStore((state) => state.listInfo);
@@ -80,22 +81,25 @@ export const Topbar = () => {
   };
 
   return (
-    <div className="flex-shrink-0 p-4 flex items-center bg-green-500">
-      <FetchTodoListForm
-        handleFetchList={handleFetchList}
-        listID={listID}
-        setListID={setListID}
-      />
-      <div className="flex-1 w-full flex jutify-center items-center">
-        <h3 className="w-full text-center text-4xl font-bold">
-          {todosList?.title}
-        </h3>
+    <div className="relative p-4 flex justify-between bg-green-500">
+      <div className="flex gap-2 z-10">
+        <FetchTodoListForm
+          handleFetchList={handleFetchList}
+          listID={listID}
+          setListID={setListID}
+        />
+        <ShowAllListsButton />
       </div>
-      <CreateTodoListForm
-        handleCreate={handleCreate}
-        listTitle={listTitle}
-        setListTitle={setListTitle}
-      />
+      <h3 className="absolute left-50 right-50 text-center text-4xl font-bold">
+        {todosList?.title}
+      </h3>
+      <div className="z-10">
+        <CreateTodoListForm
+          handleCreate={handleCreate}
+          listTitle={listTitle}
+          setListTitle={setListTitle}
+        />
+      </div>
     </div>
   );
 };

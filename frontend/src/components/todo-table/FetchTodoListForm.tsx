@@ -15,7 +15,7 @@ export const FetchTodoListForm = ({
     <form
       noValidate
       onSubmit={handleFetchList}
-      className="flex-1 flex h-full gap-2"
+      className="flex h-full gap-2"
     >
       <TextField
         className="autofill-fix"
