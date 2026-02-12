@@ -71,7 +71,8 @@ export const FetchTodoListForm = ({
           color: "black",
           fontWeight: "bold",
           "&:hover": { bgcolor: "#15803d" },
-          "&:focus": { bgcolor: "#166534" },
+          "&:active": { bgcolor: "#166534" },
+          "&:focus-visible": { bgcolor: "#166534" },
         }}
       >
         Find list

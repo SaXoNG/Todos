@@ -125,12 +125,19 @@ export const CreateTodoForm = ({
           type="button"
           variant="outlined"
           color="primary"
+          disableRipple
+          disableFocusRipple
           sx={{
             width: "100%",
             border: "2px solid black",
             borderColor: "black",
             color: "black",
             fontWeight: "bold",
+            bgcolor: "#9CA3AF",
+            "&:hover": { bgcolor: "#6B7280" },
+            "&:active": { bgcolor: "#4B5563" },
+            "&:focus-visible": { bgcolor: "#4B5563" },
+            transition: "background-color 0.2s ease-in-out",
           }}
           onClick={handleCancel}
         >
@@ -141,12 +148,19 @@ export const CreateTodoForm = ({
           variant="outlined"
           color="primary"
           disabled={title.length === 0 || creatingTodo}
+          disableRipple
+          disableFocusRipple
           sx={{
             width: "100%",
             border: "2px solid black",
             borderColor: "black",
             color: "black",
             fontWeight: "bold",
+            bgcolor: "#9CA3AF",
+            "&:hover": { bgcolor: "#6B7280" },
+            "&:active": { bgcolor: "#4B5563" },
+            "&:focus-visible": { bgcolor: "#4B5563" },
+            transition: "background-color 0.2s ease-in-out",
           }}
         >
           {creatingTodo ? <Loader /> : "Add todo"}
