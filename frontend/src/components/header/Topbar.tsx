@@ -35,7 +35,7 @@ export const Topbar = () => {
 
     if (!isValidObjectId(listID)) {
       showNotification({
-        title: "Invalid listID",
+        title: "Invalid list ID",
         text: "Example: 69ad0aab277e57185e486c75",
         type: "error",
       });

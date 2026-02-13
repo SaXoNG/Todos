@@ -51,7 +51,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
 
       useNotificationStore.getState().showNotification({
         title: "Error!",
-        text: "List doesn't exist or is empty",
+        text: "List doesn't exist",
         type: "error",
       });
     } finally {
