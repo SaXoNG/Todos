@@ -109,9 +109,13 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         set({ listInfo: null });
       }
 
+      const listToDelete = useSavedListsStore
+        .getState()
+        .savedLists.find((l) => l.id === listId);
+
       useNotificationStore.getState().showNotification({
         type: "success",
-        title: `List "${currList?.title}" was deleted!`,
+        title: `List "${listToDelete?.title}" was deleted!`,
       });
 
       useSavedListsStore.getState().removeList(listId);
@@ -121,7 +125,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
 
       useNotificationStore.getState().showNotification({
         title: "Something went wrong",
-        text: "Todo List creation went wrong, try again later!",
+        text: "Todo List deletion went wrong, try again later!",
         type: "error",
       });
     } finally {
@@ -135,7 +139,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
 
     try {
       useLoadingStore.getState().creatingTodoLoadingToggle(true);
-      useLoadingStore.getState()
+      useLoadingStore.getState();
       const { data } = await api.post(`/todos/${currListData?.id}`, todo);
 
       set({
