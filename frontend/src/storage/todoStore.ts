@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 import type { ListInfoType } from "../types/TodoListType";
 import { useNotificationStore } from "./notificationStore";
-import { useUIStore } from "./UIStore";
+import { useLoadingStore } from "./loadingStore";
 import type { CreateTodoPayload } from "../types/CreateTodoPayload";
 import type { TodoType, TODO_STATUS } from "../types/TodoType";
 import type { MoveTodoPayload } from "../types/moveTodoPayload";
@@ -31,7 +31,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
   listInfo: null,
   todos: [],
   fetchTodoList: async (listID) => {
-    useUIStore.getState().setGlobalLoading(true);
+    useLoadingStore.getState().setListFetchLoading(true);
 
     try {
       const res = await api.get(`/lists/${listID}`);
@@ -54,20 +54,19 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         text: "List doesn't exist or is empty",
         type: "error",
       });
-
     } finally {
-      useUIStore.getState().setGlobalLoading(false);
+      useLoadingStore.getState().setListFetchLoading(false);
     }
   },
 
   createTodoList: async (listTitle: string) => {
-    const uiStore = useUIStore.getState();
+    const uiStore = useLoadingStore.getState();
     const modalStore = useModalStore.getState();
     const notificationStore = useNotificationStore.getState();
     const savedListsStore = useSavedListsStore.getState();
 
     try {
-      uiStore.setGlobalLoading(true);
+      uiStore.setListFetchLoading(true);
 
       const res = await api.post("/lists", { title: listTitle });
       const { id, title } = res.data;
@@ -75,7 +74,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
       set({ listInfo: { id, title }, todos: [] });
 
       modalStore.openModal({
-        type: "single",
+        type: "createListSuccess",
         title: "Your new list is ready! 🎉",
         description: `Here’s the ID: ${id}\nKeep it safe so you can access it anywhere.`,
         id,
@@ -91,26 +90,32 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         type: "error",
       });
     } finally {
-      uiStore.setGlobalLoading(false);
+      uiStore.setListFetchLoading(false);
     }
   },
 
   deleteTodolist: async (listId) => {
     try {
-      useUIStore.getState().setGlobalLoading(true);
+      useLoadingStore.getState().setLoadingItem(listId);
+
+      const currList = get().listInfo;
+      if (listId === currList?.id) {
+        useLoadingStore.getState().setListFetchLoading(true);
+      }
 
       await api.delete(`/lists/${listId}`);
 
-      set({ listInfo: null });
+      if (listId === currList?.id) {
+        set({ listInfo: null });
+      }
 
-      useModalStore.getState().openModal({
-        type: "single",
-        title: "Your list was deleted!",
-        description: ``,
-        id: listId,
+      useNotificationStore.getState().showNotification({
+        type: "success",
+        title: `List "${currList?.title}" was deleted!`,
       });
 
       useSavedListsStore.getState().removeList(listId);
+      useLoadingStore.getState().removeLoadingItem(listId);
     } catch (error) {
       console.error("Error creating new todo list:", error);
 
@@ -120,7 +125,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         type: "error",
       });
     } finally {
-      useUIStore.getState().setGlobalLoading(false);
+      useLoadingStore.getState().setListFetchLoading(false);
     }
   },
 
@@ -129,7 +134,8 @@ export const useTodoStore = create<TodosState>((set, get) => ({
     const currTodos = get().todos;
 
     try {
-      useUIStore.getState().setCreatingTodo(true);
+      useLoadingStore.getState().creatingTodoLoadingToggle(true);
+      useLoadingStore.getState()
       const { data } = await api.post(`/todos/${currListData?.id}`, todo);
 
       set({
@@ -144,7 +150,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         type: "error",
       });
     } finally {
-      useUIStore.getState().setCreatingTodo(false);
+      useLoadingStore.getState().creatingTodoLoadingToggle(false);
     }
   },
 
@@ -152,7 +158,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
     const currTodos = get().todos;
 
     try {
-      useUIStore.getState().setLoadingTodoId(todoId);
+      useLoadingStore.getState().setLoadingItem(todoId);
 
       await api.delete(`/todos/${todoId}`);
 
@@ -170,7 +176,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
 
       set({ todos: currTodos });
     } finally {
-      useUIStore.getState().setLoadingTodoId(null);
+      useLoadingStore.getState().removeLoadingItem(todoId);
     }
   },
 
@@ -181,14 +187,14 @@ export const useTodoStore = create<TodosState>((set, get) => ({
     set({ todos: currTodos.map((t) => (t.id === id ? updatedTodo : t)) });
 
     try {
-      useUIStore.getState().setLoadingTodoId(id);
+      useLoadingStore.getState().setLoadingItem(id);
 
       await api.patch(`/todos/${id}`, { title, description });
     } catch (error) {
       console.error("Error updating todo on server:", error);
       set({ todos: currTodos });
     } finally {
-      useUIStore.getState().setLoadingTodoId(null);
+      useLoadingStore.getState().removeLoadingItem(id);
     }
   },
 
@@ -220,7 +226,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
     }
 
     try {
-      useUIStore.getState().setLoadingTodoId(todoId);
+      useLoadingStore.getState().setLoadingItem(todoId);
 
       const { data: updatedTodo } = await api.patch(
         `/todos/${todoId}/move`,
@@ -242,7 +248,7 @@ export const useTodoStore = create<TodosState>((set, get) => ({
         type: "error",
       });
     } finally {
-      useUIStore.getState().setLoadingTodoId(null);
+      useLoadingStore.getState().removeLoadingItem(todoId);
     }
   },
 }));

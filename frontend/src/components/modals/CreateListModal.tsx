@@ -1,5 +1,4 @@
 import { Typography, Button, Stack } from "@mui/material";
-import { useSavedListsStore } from "../../storage/savedListsStore";
 import { useNotificationStore } from "../../storage/notificationStore";
 
 export type SingleModalProps = {
@@ -8,13 +7,11 @@ export type SingleModalProps = {
   onClose: () => void;
 };
 
-export const SingleTodoContent = ({
+export const CreateListModal = ({
   id,
   description,
   onClose,
 }: SingleModalProps) => {
-  const savedLists = useSavedListsStore((state) => state.savedLists);
-
   return (
     <>
       <Typography
@@ -35,26 +32,24 @@ export const SingleTodoContent = ({
         >
           Close
         </Button>
-        {savedLists.find((t) => t.id === id) && (
-          <Button
-            variant="contained"
-            onClick={() => {
-              navigator.clipboard.writeText(id);
-              useNotificationStore
-                .getState()
-                .showNotification({ type: "success", title: "ID was copied" });
-            }}
-            sx={{
-              backgroundColor: "#388e3c",
-              color: "#fff",
-              "&:hover": {
-                backgroundColor: "#2e7d32",
-              },
-            }}
-          >
-            Copy
-          </Button>
-        )}
+        <Button
+          variant="contained"
+          onClick={() => {
+            navigator.clipboard.writeText(id);
+            useNotificationStore
+              .getState()
+              .showNotification({ type: "success", title: "ID was copied" });
+          }}
+          sx={{
+            backgroundColor: "#388e3c",
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: "#2e7d32",
+            },
+          }}
+        >
+          Copy
+        </Button>
       </Stack>
     </>
   );

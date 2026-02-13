@@ -1,24 +1,22 @@
-export type ModalType = "single" | "allLists";
+export type ModalType = "createListSuccess" | "savedLists";
 
 export type ModalData = {
   [K in keyof ModalPropsMap]: { type: K } & ModalPropsMap[K];
 }[keyof ModalPropsMap];
 
 export type ModalPropsMap = {
-  single: {
+  createListSuccess: {
     id: string;
     title: string;
     description?: string;
   };
-  allLists: {
+  savedLists: {
     title: string;
-    allLists: ListInfoType[];
   };
 };
 
 import type { ComponentType } from "react";
-import type { ListInfoType } from "../../types/TodoListType";
-import { SingleTodoContent } from "./SingleModal";
+import { CreateListModal } from "./CreateListModal";
 import { SavedListsModal } from "./SavedListsModal";
 
 type ModalComponent<T extends ModalType> = ComponentType<
@@ -28,6 +26,6 @@ type ModalComponent<T extends ModalType> = ComponentType<
 export const modalRegistry: {
   [K in ModalType]: ModalComponent<K>;
 } = {
-  single: SingleTodoContent,
-  allLists: SavedListsModal,
+  createListSuccess: CreateListModal,
+  savedLists: SavedListsModal,
 };

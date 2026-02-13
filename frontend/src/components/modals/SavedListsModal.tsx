@@ -1,17 +1,18 @@
 import { Box, Stack, Typography, Button } from "@mui/material";
 import { useTodoStore } from "../../storage/todoStore";
 import { useSavedListsStore } from "../../storage/savedListsStore";
-import type { ListInfoType } from "../../types/TodoListType";
+import { useLoadingStore } from "../../storage/loadingStore";
 
 export type SavedListsProps = {
-  allLists: ListInfoType[];
   onClose: () => void;
 };
 
-export const SavedListsModal = ({ allLists, onClose }: SavedListsProps) => {
+export const SavedListsModal = ({ onClose }: SavedListsProps) => {
   const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
   const deleteTodolist = useTodoStore((state) => state.deleteTodolist);
   const listInfo = useTodoStore((state) => state.listInfo);
+  const savedLists = useSavedListsStore((state) => state.savedLists);
+  const loadingIDs = useLoadingStore((state) => state.loadingIDs);
 
   const handleLoad = (id: string | null) => {
     if (id && id !== listInfo?.id) {
@@ -23,13 +24,11 @@ export const SavedListsModal = ({ allLists, onClose }: SavedListsProps) => {
 
   const handleDelete = async (id: string | null) => {
     if (id) {
-      onClose();
       await deleteTodolist(id);
-      useSavedListsStore.getState().removeList(id);
     }
   };
 
-  return allLists.length === 0 ? (
+  return savedLists.length === 0 ? (
     <Typography textAlign="center">No saved lists yet.</Typography>
   ) : (
     <Stack
@@ -40,7 +39,7 @@ export const SavedListsModal = ({ allLists, onClose }: SavedListsProps) => {
         pr: 1,
       }}
     >
-      {allLists.map((list) => (
+      {savedLists.map((list) => (
         <Box
           key={list.id}
           sx={{
@@ -61,6 +60,7 @@ export const SavedListsModal = ({ allLists, onClose }: SavedListsProps) => {
           </div>
           <Stack direction="row" spacing={1}>
             <Button
+              key="load"
               size="small"
               variant="outlined"
               onClick={() => handleLoad(list.id)}
@@ -72,9 +72,11 @@ export const SavedListsModal = ({ allLists, onClose }: SavedListsProps) => {
               Load
             </Button>
             <Button
+              key="delete"
               size="small"
               variant="outlined"
               color="error"
+              loading={loadingIDs.includes(String(list.id))}
               onClick={() => handleDelete(list.id)}
             >
               Delete

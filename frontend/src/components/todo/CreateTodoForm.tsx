@@ -1,6 +1,6 @@
 import { Button, TextField } from "@mui/material";
 import { Loader } from "../Loader";
-import { useUIStore } from "../../storage/UIStore";
+import { useLoadingStore } from "../../storage/loadingStore";
 
 type Props = {
   handleSubmit: (e: React.FormEvent<HTMLFormElement>) => Promise<void>;
@@ -21,7 +21,7 @@ export const CreateTodoForm = ({
   description,
   handleCancel,
 }: Props) => {
-  const creatingTodo = useUIStore((state) => state.creatingTodo);
+  const creatingTodoLoading = useLoadingStore((state) => state.creatingTodoLoading);
 
   return (
     <form
@@ -147,7 +147,7 @@ export const CreateTodoForm = ({
           type="submit"
           variant="outlined"
           color="primary"
-          disabled={title.length === 0 || creatingTodo}
+          disabled={title.length === 0 || creatingTodoLoading}
           disableRipple
           disableFocusRipple
           sx={{
@@ -163,7 +163,7 @@ export const CreateTodoForm = ({
             transition: "background-color 0.2s ease-in-out",
           }}
         >
-          {creatingTodo ? <Loader /> : "Add todo"}
+          {creatingTodoLoading ? <Loader /> : "Add todo"}
         </Button>
       </div>
     </form>

@@ -10,7 +10,7 @@ import {
 } from "@dnd-kit/sortable";
 import { useEffect, useState } from "react";
 import { TODO_STATUS, type TodoType } from "../../types/TodoType";
-import { useUIStore } from "../../storage/UIStore";
+import { useLoadingStore } from "../../storage/loadingStore";
 import { useTodoStore } from "../../storage/todoStore";
 import { useSavedListsStore } from "../../storage/savedListsStore";
 import { Loader } from "../Loader";
@@ -24,13 +24,13 @@ const TableColumns = [
 ];
 
 export const TodoTable = () => {
-  const setGlobalLoading = useUIStore((state) => state.setGlobalLoading);
+  const setListFetchLoading = useLoadingStore((state) => state.setListFetchLoading);
 
-  const loadingTodoId = useUIStore((state) => state.loadingTodoId);
+  const loadingIDs = useLoadingStore((state) => state.loadingIDs);
   const fetchTodoList = useTodoStore((state) => state.fetchTodoList);
   const moveTodo = useTodoStore((state) => state.moveTodo);
 
-  const globalLoading = useUIStore((state) => state.globalLoading);
+  const listFetchLoading = useLoadingStore((state) => state.listFetchLoading);
   const todosList = useTodoStore((state) => state.listInfo);
   const todos = useTodoStore((state) => state.todos);
 
@@ -48,7 +48,7 @@ export const TodoTable = () => {
     const savedLists = useSavedListsStore.getState().savedLists;
 
     if (savedLists.length === 0) {
-      setGlobalLoading(false);
+      setListFetchLoading(false);
       return;
     }
 
@@ -57,7 +57,7 @@ export const TodoTable = () => {
     if (firstListId) {
       fetchTodoList(firstListId);
     }
-  }, [fetchTodoList, setGlobalLoading]);
+  }, [fetchTodoList, setListFetchLoading]);
 
   useEffect(() => {
     if (!todos) {
@@ -78,7 +78,7 @@ export const TodoTable = () => {
     });
   }, [todos]);
 
-  if (globalLoading) {
+  if (listFetchLoading) {
     return (
       <div className="relative h-full">
         <Loader />
@@ -209,9 +209,9 @@ export const TodoTable = () => {
   return (
     <DndContext
       collisionDetection={closestCenter}
-      onDragStart={loadingTodoId ? undefined : handleDragStart}
-      onDragMove={loadingTodoId ? undefined : handleDragMove}
-      onDragEnd={loadingTodoId ? undefined : handleDragEnd}
+      onDragStart={loadingIDs.length > 0 ? undefined : handleDragStart}
+      onDragMove={loadingIDs.length > 0 ? undefined : handleDragMove}
+      onDragEnd={loadingIDs.length > 0 ? undefined : handleDragEnd}
     >
       <div
         className="grid p-6 gap-x-6 h-full overflow-hidden"

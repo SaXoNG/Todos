@@ -1,12 +1,15 @@
 import { create } from "zustand";
-import type { ListInfoType } from "../types/TodoListType";
 
 type ModalData =
-  | { type: "single"; id: string; title: string; description?: string }
   | {
-      type: "allLists";
+      type: "createListSuccess";
+      id: string;
       title: string;
-      allLists: ListInfoType[];
+      description?: string;
+    }
+  | {
+      type: "savedLists";
+      title: string;
     };
 
 type ModalStore = {

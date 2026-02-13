@@ -3,7 +3,7 @@ import { CSS } from "@dnd-kit/utilities";
 import type { JSX } from "react";
 import { useState, useRef } from "react";
 import { useTodoStore } from "../../storage/todoStore";
-import { useUIStore } from "../../storage/UIStore";
+import { useLoadingStore } from "../../storage/loadingStore";
 import { useNotificationStore } from "../../storage/notificationStore";
 import { IconBtn } from "../IconBtn";
 import { Loader } from "../Loader";
@@ -14,7 +14,7 @@ type Props = { todo: TodoType };
 
 export const TodoItem = ({ todo }: Props): JSX.Element => {
   const { id, title, description } = todo;
-  const loadingTodoId = useUIStore((state) => state.loadingTodoId);
+  const loadingIDs = useLoadingStore((state) => state.loadingIDs);
 
   const {
     attributes,
@@ -23,7 +23,7 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: todo.id, disabled: !!loadingTodoId });
+  } = useSortable({ id: todo.id, disabled: loadingIDs.length > 0 });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -99,7 +99,7 @@ export const TodoItem = ({ todo }: Props): JSX.Element => {
           : ""
       }`}
     >
-      {loadingTodoId === id && <Loader />}
+      {loadingIDs.includes(id) && <Loader />}
       <div className="flex justify-between items-start">
         <div className="text-xl font-semibold break-words whitespace-normal max-w-[80%] px-2">
           {title}

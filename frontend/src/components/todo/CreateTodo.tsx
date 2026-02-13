@@ -15,7 +15,7 @@ export const CreateTodo = ({ firstTodoId }: Props): JSX.Element => {
     (state) => state.showNotification,
   );
 
-  const [creatingTodo, setCreatingTodo] = useState(false);
+  const [openCreatingForm, setOpenCreatingForm] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
@@ -26,7 +26,7 @@ export const CreateTodo = ({ firstTodoId }: Props): JSX.Element => {
 
     if (title.trim().length < 3) {
       showNotification({
-        title: "Min length is 3 chars",
+        title: "Min length for todo title is 3 chars",
         type: "warning",
       });
 
@@ -50,7 +50,7 @@ export const CreateTodo = ({ firstTodoId }: Props): JSX.Element => {
     try {
       await createTodo(newTodo);
 
-      setCreatingTodo(false);
+      setOpenCreatingForm(false);
       setTitle("");
       setDescription("");
     } catch (error) {
@@ -59,14 +59,14 @@ export const CreateTodo = ({ firstTodoId }: Props): JSX.Element => {
   };
 
   const handleCancel = () => {
-    setCreatingTodo(false);
+    setOpenCreatingForm(false);
     setTitle("");
     setDescription("");
   };
 
   return (
     <div className="pt-5" data-id={firstTodoId}>
-      {creatingTodo ? (
+      {openCreatingForm ? (
         <CreateTodoForm
           handleSubmit={handleSubmit}
           inputRef={inputRef}
@@ -80,7 +80,7 @@ export const CreateTodo = ({ firstTodoId }: Props): JSX.Element => {
         <div
           className="flex h-full border-2 justify-center items-center p-2 max-h-20 rounded"
           onClick={() => {
-            setCreatingTodo(true);
+            setOpenCreatingForm(true);
             setTimeout(() => inputRef.current?.focus(), 0);
           }}
         >

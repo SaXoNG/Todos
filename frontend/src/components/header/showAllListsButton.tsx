@@ -1,16 +1,13 @@
 import { Button } from "@mui/material";
 import { useModalStore } from "../../storage/modalStore";
-import { useSavedListsStore } from "../../storage/savedListsStore";
 
 export const ShowAllListsButton = () => {
   const openModal = useModalStore((state) => state.openModal);
-  const savedLists = useSavedListsStore((state) => state.savedLists);
 
   const handleClick = () => {
     openModal({
-      type: "allLists",
+      type: "savedLists",
       title: "Saved Lists",
-      allLists: savedLists,
     });
   };
 

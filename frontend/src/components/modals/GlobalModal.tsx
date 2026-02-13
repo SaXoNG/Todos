@@ -8,8 +8,8 @@ export const GlobalModal = () => {
 
   if (!data) return null;
 
-  if (data.type === "single") {
-    const ModalContent = modalRegistry.single;
+  if (data.type === "createListSuccess") {
+    const ModalContent = modalRegistry.createListSuccess;
     return (
       <ModalWrapper open title={data.title} onClose={closeModal}>
         <ModalContent {...data} onClose={closeModal} />
@@ -17,8 +17,8 @@ export const GlobalModal = () => {
     );
   }
 
-  if (data.type === "allLists") {
-    const ModalContent = modalRegistry.allLists;
+  if (data.type === "savedLists") {
+    const ModalContent = modalRegistry.savedLists;
     return (
       <ModalWrapper open title={data.title} onClose={closeModal}>
         <ModalContent {...data} onClose={closeModal} />
